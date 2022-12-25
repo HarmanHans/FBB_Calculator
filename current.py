@@ -25,8 +25,7 @@ def convert_string(str):
 # param: The players minutes in string form
 # returns: the players minutes in double form
 def convert_minutes(str):
-    if not str:
-        return -1
+    num = float(str)
 
 # opens a webpage to extract its url
 # param: a string that represents a url
