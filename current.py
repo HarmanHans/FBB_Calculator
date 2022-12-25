@@ -5,7 +5,6 @@ import time
 import pymongo
 from pymongo import MongoClient
 
-#cluster = pymongo.MongoClient("mongodb+srv://hans:rupwTH9cVbCgGZht@nodecluster.gknsvxa.mongodb.net/?retryWrites=true&w=majority")
 
 MONTHS = ["october", "november", "december"]
 links = []
@@ -25,7 +24,12 @@ def convert_string(str):
 # param: The players minutes in string form
 # returns: the players minutes in double form
 def convert_minutes(str):
-    num = float(str)
+    minute_side = str.split(':')[0]
+    second_side = str.split(':')[1]
+
+    min_side_num = float(minute_side)
+    sec_side_num = float(second_side) / 60
+    print(min_side_num + sec_side_num)
 
 # opens a webpage to extract its url
 # param: a string that represents a url
@@ -51,12 +55,21 @@ def scrape_game_links(month):
 
 # given a box score page, scrapes stats of each player who played
 # param: A url (string form) to the box score we're extracting data from
+# returns: stat lines of all players on both teams in a list
+# TODO: GET THE CORRECT TABLES!!!
 def scrape_player_data(link):
+    tables = []
+    results = []
     soup = open_page(link)
-    tables = soup.find_all("table", {"class": "sortable stats_table now_sortable"})
+    matchup = soup.find("table", {"id": "line_score"})
+    team_boxes = matchup.find_all("th", {"data-stat": "team"})
+    for team_box in team_boxes:
+        if (team_box.find("a") is not None):
+            name = team_box.find("a").get_text()
+            tables.append(soup.find("table", {"id": "box-" + name + "-game-basic"}))
     for table in tables:
         body = table.find("tbody")
-        results = body.find_all("tr", {"class": None})
+        results.append(body.find_all("tr", {"class": None}))
     return results
 
 # given each players statline from the website, this method cleans the data 
@@ -66,12 +79,15 @@ def clean_player_data(results):
     for result in results:
         datum = {}
 
-        # if player did not play condition goes here
+        # if player did not play condition goes here possibly
+        if (result.find("td", {"data-stat": "reason"})):
+            print(result)
+            continue
+        print("played")
+        # nameBox = result.find("th", {"data-stat": "player"})
+        # name = nameBox.find("a").get_text()
 
-        nameBox = result.find("th", {"data-stat": "player"})
-        name = nameBox.find("a").get_text()
-
-        minutes = convert_minutes(result.find("td", {"data-stat": "mp"}).get_text())
+        # minutes = convert_minutes(result.find("td", {"data-stat": "mp"}).get_text())
 
 #scrape_game_links("october")
 # for month in MONTHS:
