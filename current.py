@@ -28,8 +28,8 @@ def convert_minutes(str):
     second_side = str.split(':')[1]
 
     min_side_num = float(minute_side)
-    sec_side_num = float(second_side) / 60
-    print(min_side_num + sec_side_num)
+    sec_side_num = round((float(second_side) / 60), 2)
+    return(min_side_num + sec_side_num)
 
 # opens a webpage to extract its url
 # param: a string that represents a url
@@ -41,6 +41,33 @@ def open_page(url):
     html = browser.page_source
     soup = BeautifulSoup(html, 'html.parser')
     return soup
+
+# adds player's position if it's not listed already
+# param: (pos) - list containing positions played by player
+# param: (pos_value) - String representing position played in a given year
+def contains_position(pos, pos_value):
+    if not pos_value:
+        return pos 
+    if pos_value not in pos:
+            pos.append(pos_value)
+    return pos
+
+# creates list of positions played by player
+# param: link to individual player page
+# returns: list containing positions played by player in each season of career
+def get_player_position(url):
+    pos = []
+    soup = open_page(url)
+    table = soup.find("table", {"id": "per_game"})
+    position_tags = table.find_all("td", {"data-stat": "pos"})
+    print(position_tags)
+    for tag in position_tags:
+        pos_value = tag.get_text()
+        individual = pos_value.split(',')
+        for i in individual:
+            contains_position(pos, i)
+    return(pos)
+        
 
 # retrieves the box score of every single NBA game played in the months given to it.
 # param: the month we are getting data from
@@ -56,7 +83,6 @@ def scrape_game_links(month):
 # given a box score page, scrapes stats of each player who played
 # param: A url (string form) to the box score we're extracting data from
 # returns: stat lines of all players on both teams in a list
-# TODO: GET THE CORRECT TABLES!!!
 def scrape_player_data(link):
     tables = []
     results = []
@@ -69,7 +95,8 @@ def scrape_player_data(link):
             tables.append(soup.find("table", {"id": "box-" + name + "-game-basic"}))
     for table in tables:
         body = table.find("tbody")
-        results.append(body.find_all("tr", {"class": None}))
+        rows = body.find_all("tr", {"class": None}) # gets overwritten!!
+        results = results + rows
     return results
 
 # given each players statline from the website, this method cleans the data 
@@ -79,25 +106,93 @@ def clean_player_data(results):
     for result in results:
         datum = {}
 
-        # if player did not play condition goes here possibly
+        nameBox = result.find("th", {"data-stat": "player"})
+        name = nameBox.find("a").get_text()
+
+        pos_url = "https://www.basketball-reference.com/" + nameBox.find("a").get("href")
+        pos_list = get_player_position(pos_url)
+
+        # if player did not play
         if (result.find("td", {"data-stat": "reason"})):
-            print(result)
-            continue
-        print("played")
-        # nameBox = result.find("th", {"data-stat": "player"})
-        # name = nameBox.find("a").get_text()
+            minutes = -1
+            fg = -1
+            attempts = -1
+            fg_pct = -1
+            fg3 = -1
+            fg3_attempts = -1
+            fg3_pct = -1
+            ft = -1
+            ft_attempts = -1
+            ft_pct = -1
+            orb = -1
+            drb = -1
+            reb = -1
+            ast = -1
+            stl = -1
+            blk = -1
+            turnovers = -1
+            fouls = -1
+            pts = -1
+            plus_minus = None
 
-        # minutes = convert_minutes(result.find("td", {"data-stat": "mp"}).get_text())
+        else:
+            minutes = convert_minutes(result.find("td", {"data-stat": "mp"}).get_text())
+            fg = convert_string(result.find("td", {"data-stat": "fg"}).get_text())
+            attempts = convert_string(result.find("td", {"data-stat": "fga"}).get_text())
+            fg_pct = convert_string(result.find("td", {"data-stat": "fg_pct"}).get_text())
+            fg3 = convert_string(result.find("td", {"data-stat": "fg3"}).get_text())
+            fg3_attempts = convert_string(result.find("td", {"data-stat": "fg3a"}).get_text())
+            fg3_pct = convert_string(result.find("td", {"data-stat": "fg3_pct"}).get_text())
+            ft = convert_string(result.find("td", {"data-stat": "ft"}).get_text())
+            ft_attempts = convert_string(result.find("td", {"data-stat": "fta"}).get_text())
+            ft_pct = convert_string(result.find("td", {"data-stat": "ft_pct"}).get_text())
+            orb = convert_string(result.find("td", {"data-stat": "orb"}).get_text())
+            drb = convert_string(result.find("td", {"data-stat": "drb"}).get_text())
+            reb = convert_string(result.find("td", {"data-stat": "trb"}).get_text())
+            ast = convert_string(result.find("td", {"data-stat": "ast"}).get_text())
+            stl = convert_string(result.find("td", {"data-stat": "stl"}).get_text())
+            blk = convert_string(result.find("td", {"data-stat": "blk"}).get_text())
+            turnovers = convert_string(result.find("td", {"data-stat": "tov"}).get_text())
+            fouls = convert_string(result.find("td", {"data-stat": "pf"}).get_text())
+            pts = convert_string(result.find("td", {"data-stat": "pts"}).get_text())
+            plus_minus = convert_string(result.find("td", {"data-stat": "plus_minus"}).get_text())
+        
+        datum['name'] = name
+        datum['minutes'] = minutes
+        datum['fg'] = fg
+        datum['attempts'] = attempts
+        datum['fg_pct'] = fg_pct
+        datum['fg3'] = fg3
+        datum['fg3'] = fg3_attempts
+        datum['fg3_pct'] = fg3_pct
+        datum['ft'] = ft
+        datum['ft_attempts'] = ft_attempts
+        datum['ft_pct'] = ft_pct
+        datum['orb'] = orb
+        datum['drb'] = drb
+        datum['reb'] = reb
+        datum['ast'] = ast
+        datum['stl'] = stl
+        datum['blk'] = blk
+        datum['turnovers'] = turnovers
+        datum['fouls'] = fouls
+        datum['pts'] = pts
+        datum['plus_minus'] = plus_minus
 
-#scrape_game_links("october")
-# for month in MONTHS:
+        data.append(datum)
+        data.append(pos_list)
+
+#for month in MONTHS:
 #    scrape_game_links(month)
+#for link in links:
+#    results = scrape_player_data(link)
+#    clean_player_data(results)
+#print(data)
 
+# Testing:
 results = scrape_player_data("https://www.basketball-reference.com/boxscores/202210180BOS.html")
 clean_player_data(results)
-#for link in links:
-#    scrape_player_data(link)
-
+print(data)
 # TODO: get every box-score (DONE!)
 # TODO: get player stats from each box score
 # TODO: every player needs to have their stats from each game
