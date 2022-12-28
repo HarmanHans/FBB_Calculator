@@ -42,6 +42,12 @@ def open_page(url):
     soup = BeautifulSoup(html, 'html.parser')
     return soup
 
+def click_element(url):
+    browser = webdriver.Chrome()
+    browser.get(url)
+    time.sleep(5)
+
+
 # adds player's position if it's not listed already
 # param: (pos) - list containing positions played by player
 # param: (pos_value) - String representing position played in a given year
@@ -55,9 +61,11 @@ def contains_position(pos, pos_value):
 # creates list of positions played by player
 # param: link to individual player page
 # returns: list containing positions played by player in each season of career
-def get_player_position(url):
+def get_player_position(name):
     pos = []
-    soup = open_page(url)
+    url = "https://hashtagbasketball.com/fantasy-basketball-rankings"
+    soup = click_element(url)
+
     table = soup.find("table", {"id": "per_game"})
     position_tags = table.find_all("td", {"data-stat": "pos"})
     print(position_tags)
@@ -109,8 +117,10 @@ def clean_player_data(results):
         nameBox = result.find("th", {"data-stat": "player"})
         name = nameBox.find("a").get_text()
 
-        pos_url = "https://www.basketball-reference.com/" + nameBox.find("a").get("href")
-        pos_list = get_player_position(pos_url)
+        
+        pos_list = get_player_position(name)
+
+
 
         # if player did not play
         if (result.find("td", {"data-stat": "reason"})):
