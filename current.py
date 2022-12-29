@@ -83,9 +83,9 @@ def get_player_position(name):
     table = soup.find("table", {"class": "table table-sm table-bordered table-striped table--statistics"})
     nameRows = table.find_all("tr")
     count = 0
-    for i in nameRows:
+    for nameRow in nameRows:
         count = count + 1
-        names = nameRows.find("a")
+        names = nameRow.find("a")
         print(names)
     print(count)
     #for tag in position_tags:
