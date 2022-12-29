@@ -81,9 +81,13 @@ def get_player_position(name):
     html = browser.page_source
     soup = BeautifulSoup(html, 'html.parser')
     table = soup.find("table", {"class": "table table-sm table-bordered table-striped table--statistics"})
-    names = table.find_all("a", {"target": "_blank"})
-    for i in names:
-        print(i.get_text())
+    nameRows = table.find_all("tr")
+    count = 0
+    for i in nameRows:
+        count = count + 1
+        names = nameRows.find("a")
+        print(names)
+    print(count)
     #for tag in position_tags:
     #    pos_value = tag.get_text()
     #    individual = pos_value.split(',')
@@ -220,11 +224,14 @@ def clean_player_data(results):
 #print(data)
 get_player_position("james harden")
 # TODO: get every box-score (DONE!)
-# TODO: get player stats from each box score
-# TODO: every player needs to have their stats from each game
+# TODO: get player stats from each box score (DONE!)
+# TODO: every player needs to have their stats from each game (probably done, either that or simple to do)
 # TODO: every player needs to have season averages based on each game
     #TODO: for averages, a game where they score 0 bc they didn't play is different than a 0 point game. 
     #      same for other stats.
+# TODO: find out how to scroll down in webpage, so position scraper doesn't crash
+# TODO: find way to store players and their positions. then when we find a player in a box score, we add their game stats to the players identity
+    # probably in JSON form
 
 
 
