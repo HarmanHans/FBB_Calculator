@@ -42,11 +42,14 @@ def open_page(url):
     soup = BeautifulSoup(html, 'html.parser')
     return soup
 
-def click_element(url):
-    browser = webdriver.Chrome()
-    browser.get(url)
-    time.sleep(5)
-
+# clicks on given element in html
+# param: (browser) - controls the browser to open page, manipulate elements
+# param: (xpath) - the location of a given element in the page
+def click_element(browser, xpath):
+    element = browser.find_element("xpath", xpath)
+    element.click
+    time.sleep(10)
+    print(element.text)
 
 # adds player's position if it's not listed already
 # param: (pos) - list containing positions played by player
@@ -64,17 +67,29 @@ def contains_position(pos, pos_value):
 def get_player_position(name):
     pos = []
     url = "https://hashtagbasketball.com/fantasy-basketball-rankings"
-    soup = click_element(url)
-
-    table = soup.find("table", {"id": "per_game"})
-    position_tags = table.find_all("td", {"data-stat": "pos"})
-    print(position_tags)
-    for tag in position_tags:
-        pos_value = tag.get_text()
-        individual = pos_value.split(',')
-        for i in individual:
-            contains_position(pos, i)
-    return(pos)
+    player_list_element = '//*[@id="ContentPlaceHolder1_DDSHOW"]'
+    all_player_option = "//*[@id='ContentPlaceHolder1_DDSHOW']/option[6]"
+    sort_alphabetical = "//*[@id='ContentPlaceHolder1_GridView1']/tbody/tr[1]/th[2]"
+    
+    browser = webdriver.Chrome()
+    browser.get(url)
+    time.sleep(3)
+    click_element(browser, player_list_element)
+    click_element(browser, all_player_option)
+    for i in range(2):
+        click_element(browser, sort_alphabetical)
+    html = browser.page_source
+    soup = BeautifulSoup(html, 'html.parser')
+    table = soup.find("table", {"class": "table table-sm table-bordered table-striped table--statistics"})
+    names = table.find_all("a")
+    for i in names:
+        print(i.get_text())
+    #for tag in position_tags:
+    #    pos_value = tag.get_text()
+    #    individual = pos_value.split(',')
+    #    for i in individual:
+    #        contains_position(pos, i)
+    #return(pos)
         
 
 # retrieves the box score of every single NBA game played in the months given to it.
@@ -200,9 +215,10 @@ def clean_player_data(results):
 #print(data)
 
 # Testing:
-results = scrape_player_data("https://www.basketball-reference.com/boxscores/202210180BOS.html")
-clean_player_data(results)
-print(data)
+#results = scrape_player_data("https://www.basketball-reference.com/boxscores/202210180BOS.html")
+#clean_player_data(results)
+#print(data)
+get_player_position("james harden")
 # TODO: get every box-score (DONE!)
 # TODO: get player stats from each box score
 # TODO: every player needs to have their stats from each game
