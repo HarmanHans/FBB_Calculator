@@ -49,7 +49,6 @@ def click_element(browser, xpath):
     element = browser.find_element("xpath", xpath)
     element.click()
     time.sleep(5)
-    #print(element.text)
 
 # adds player's position if it's not listed already
 # param: (pos) - list containing positions played by player
@@ -82,7 +81,7 @@ def get_player_position(name):
     html = browser.page_source
     soup = BeautifulSoup(html, 'html.parser')
     table = soup.find("table", {"class": "table table-sm table-bordered table-striped table--statistics"})
-    names = table.find_all("a")
+    names = table.find_all("a", {"target": "_blank"})
     for i in names:
         print(i.get_text())
     #for tag in position_tags:
