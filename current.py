@@ -47,9 +47,9 @@ def open_page(url):
 # param: (xpath) - the location of a given element in the page
 def click_element(browser, xpath):
     element = browser.find_element("xpath", xpath)
-    element.click
-    time.sleep(10)
-    print(element.text)
+    element.click()
+    time.sleep(5)
+    #print(element.text)
 
 # adds player's position if it's not listed already
 # param: (pos) - list containing positions played by player
@@ -67,9 +67,10 @@ def contains_position(pos, pos_value):
 def get_player_position(name):
     pos = []
     url = "https://hashtagbasketball.com/fantasy-basketball-rankings"
+    
     player_list_element = '//*[@id="ContentPlaceHolder1_DDSHOW"]'
-    all_player_option = "//*[@id='ContentPlaceHolder1_DDSHOW']/option[6]"
-    sort_alphabetical = "//*[@id='ContentPlaceHolder1_GridView1']/tbody/tr[1]/th[2]"
+    all_player_option = '/html/body/form/div[3]/div/div[3]/div[2]/div/div[1]/div[1]/table/tbody/tr/td[1]/select/option[6]'
+    sort_alphabetical = '//*[@id="ContentPlaceHolder1_GridView1"]/tbody/tr[1]/th[2]'
     
     browser = webdriver.Chrome()
     browser.get(url)
