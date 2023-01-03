@@ -2,6 +2,7 @@ import os
 from bs4 import BeautifulSoup
 from selenium import webdriver
 import time
+import json
 import pymongo
 from pymongo import MongoClient
 
@@ -50,20 +51,10 @@ def click_element(browser, xpath):
     element.click()
     time.sleep(5)
 
-# adds player's position if it's not listed already
-# param: (pos) - list containing positions played by player
-# param: (pos_value) - String representing position played in a given year
-def contains_position(pos, pos_value):
-    if not pos_value:
-        return pos 
-    if pos_value not in pos:
-            pos.append(pos_value)
-    return pos
-
 # creates list of positions played by player
 # param: link to individual player page
 # returns: list containing positions played by player in each season of career
-def get_player_position(name):
+def get_player_position():
     pos = []
     url = "https://hashtagbasketball.com/fantasy-basketball-rankings"
     
@@ -82,18 +73,14 @@ def get_player_position(name):
     soup = BeautifulSoup(html, 'html.parser')
     table = soup.find("table", {"class": "table table-sm table-bordered table-striped table--statistics"})
     nameRows = table.find_all("tr")
-    count = 0
     for nameRow in nameRows:
-        count = count + 1
-        names = nameRow.find("a")
-        print(names)
-    print(count)
-    #for tag in position_tags:
-    #    pos_value = tag.get_text()
-    #    individual = pos_value.split(',')
-    #    for i in individual:
-    #        contains_position(pos, i)
-    #return(pos)
+        nameBox = nameRow.find("a")
+        if (nameBox is not None):
+            name = nameBox.get_text()
+            posTab = nameRow.findNext("td").findNext("td").findNext("td").contents[0]
+            posEligibility = posTab.split(',')
+        print(name)
+        print(posEligibility)
         
 
 # retrieves the box score of every single NBA game played in the months given to it.
@@ -222,7 +209,7 @@ def clean_player_data(results):
 #results = scrape_player_data("https://www.basketball-reference.com/boxscores/202210180BOS.html")
 #clean_player_data(results)
 #print(data)
-get_player_position("james harden")
+get_player_position()
 # TODO: get every box-score (DONE!)
 # TODO: get player stats from each box score (DONE!)
 # TODO: every player needs to have their stats from each game (probably done, either that or simple to do)
