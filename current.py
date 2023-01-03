@@ -51,11 +51,8 @@ def click_element(browser, xpath):
     element.click()
     time.sleep(5)
 
-# creates list of positions played by player
-# param: link to individual player page
-# returns: list containing positions played by player in each season of career
+# creates initial player profile with name and position
 def get_player_position():
-    pos = []
     url = "https://hashtagbasketball.com/fantasy-basketball-rankings"
     
     player_list_element = '//*[@id="ContentPlaceHolder1_DDSHOW"]'
@@ -74,13 +71,20 @@ def get_player_position():
     table = soup.find("table", {"class": "table table-sm table-bordered table-striped table--statistics"})
     nameRows = table.find_all("tr")
     for nameRow in nameRows:
+        profile = {}
         nameBox = nameRow.find("a")
         if (nameBox is not None):
             name = nameBox.get_text()
+            # unfortunately had to hardcode, unicodedata seems to not replace š with s
+            if (name == 'Aleksej Pokuševski'):
+                name = 'Aleksej Pokusevski'
             posTab = nameRow.findNext("td").findNext("td").findNext("td").contents[0]
             posEligibility = posTab.split(',')
-        print(name)
-        print(posEligibility)
+        if (name != 'PLAYER'):
+            profile['name'] = name
+            profile['pos'] = posEligibility
+            data.append(profile)
+
         
 
 # retrieves the box score of every single NBA game played in the months given to it.
@@ -109,7 +113,7 @@ def scrape_player_data(link):
             tables.append(soup.find("table", {"id": "box-" + name + "-game-basic"}))
     for table in tables:
         body = table.find("tbody")
-        rows = body.find_all("tr", {"class": None}) # gets overwritten!!
+        rows = body.find_all("tr", {"class": None})
         results = results + rows
     return results
 
@@ -210,6 +214,7 @@ def clean_player_data(results):
 #clean_player_data(results)
 #print(data)
 get_player_position()
+print(data)
 # TODO: get every box-score (DONE!)
 # TODO: get player stats from each box score (DONE!)
 # TODO: every player needs to have their stats from each game (probably done, either that or simple to do)
