@@ -178,7 +178,7 @@ def clean_player_data(results, day):
         datum['attempts'] = attempts
         datum['fg_pct'] = fg_pct
         datum['fg3'] = fg3
-        datum['fg3'] = fg3_attempts
+        datum['fg3_attempts'] = fg3_attempts
         datum['fg3_pct'] = fg3_pct
         datum['ft'] = ft
         datum['ft_attempts'] = ft_attempts
@@ -238,7 +238,7 @@ print(data)
     #TODO: for averages, a game where they score 0 bc they didn't play is different than a 0 point game. 
     #      same for other stats.
 # TODO: find out how to scroll down in webpage, so position scraper doesn't crash
-# TODO: find way to store players and their positions. then when we find a player in a box score, we add their game stats to the players identity
+# TODO: find way to store players and their positions. then when we find a player in a box score, we add their game stats to the players identity (DONE!)
     # probably in JSON form
 
 
