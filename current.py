@@ -89,6 +89,7 @@ def get_player_position():
         if (name != 'PLAYER'):
             profile['name'] = name
             profile['pos'] = posEligibility
+            profile['games'] = []
             data.append(profile)
 
 # converts the date a game took place to how many days it was from tipoff day
@@ -104,7 +105,6 @@ def convert_date(date_heading):
         day = day + convert_days[date_split[1]] + int(date_split[2]) - 1
     return day
       
-
 # retrieves the box score of every single NBA game played in the months given to it.
 # param: (month) - the month we are getting data from
 def scrape_game_links(month):
@@ -116,43 +116,17 @@ def scrape_game_links(month):
         link = "https://www.basketball-reference.com" + box.find("a").get("href")
         links.append(link)
 
-# given a box score page, scrapes stats of each player who played
-# param: A url (string form) to the box score we're extracting data from
-# returns: stat lines of all players on both teams in a list
-def scrape_player_data(link):
-    tables = []
-    results = []
-    soup = open_page(link)
-    matchup = soup.find("table", {"id": "line_score"})
-    team_boxes = matchup.find_all("th", {"data-stat": "team"})
-    date_heading = soup.find("h1").get_text()
-    day = convert_date(date_heading)
-    for team_box in team_boxes:
-        if (team_box.find("a") is not None):
-            name = team_box.find("a").get_text()
-            tables.append(soup.find("table", {"id": "box-" + name + "-game-basic"}))
-    for table in tables:
-        body = table.find("tbody")
-        rows = body.find_all("tr", {"class": None})
-        results = results + rows
-    return [results, day]
-
 # given each players statline from the website, this method cleans the data 
 # and divides it into separate stats
-# param: a list of player data
+# param: (results) a list of player data
+# param: (day) distance from tip off day that game took place
 def clean_player_data(results, day):
     for result in results:
         datum = {}
 
         nameBox = result.find("th", {"data-stat": "player"})
         name = nameBox.find("a").get_text()
-
-        pos_list = get_player_position(name) # change to get position from dictionary
- 
-        #get h1 from bballref
-        #split date off
-        # use date as key to add game to dictionary
-
+        day_key = str(day)
         # if player did not play
         if (result.find("td", {"data-stat": "reason"})):
             minutes = -1
@@ -198,7 +172,7 @@ def clean_player_data(results, day):
             pts = convert_string(result.find("td", {"data-stat": "pts"}).get_text())
             plus_minus = convert_string(result.find("td", {"data-stat": "plus_minus"}).get_text())
         
-        datum['name'] = name
+        datum['day'] = day
         datum['minutes'] = minutes
         datum['fg'] = fg
         datum['attempts'] = attempts
@@ -220,8 +194,29 @@ def clean_player_data(results, day):
         datum['pts'] = pts
         datum['plus_minus'] = plus_minus
 
-        data.append(datum)
-        data.append(pos_list)
+        for dict in data:
+            if (name == dict['name']):
+                dict['games'].append(datum)
+
+# given a box score page, scrapes stats of each player who played
+# param: A url (string form) to the box score we're extracting data from
+def scrape_player_data(link):
+    tables = []
+    results = []
+    soup = open_page(link)
+    matchup = soup.find("table", {"id": "line_score"})
+    team_boxes = matchup.find_all("th", {"data-stat": "team"})
+    date_heading = soup.find("h1").get_text()
+    day = convert_date(date_heading)
+    for team_box in team_boxes:
+        if (team_box.find("a") is not None):
+            name = team_box.find("a").get_text()
+            tables.append(soup.find("table", {"id": "box-" + name + "-game-basic"}))
+    for table in tables:
+        body = table.find("tbody")
+        rows = body.find_all("tr", {"class": None})
+        results = results + rows
+    clean_player_data(results, day)
 
 #for month in MONTHS:
 #    scrape_game_links(month)
@@ -231,10 +226,10 @@ def clean_player_data(results, day):
 #print(data)
 
 # Testing:
-results = scrape_player_data("https://www.basketball-reference.com/boxscores/202210270SAC.html")
-#clean_player_data(results)
-#print(data)
-#get_player_position()
+get_player_position()
+scrape_player_data("https://www.basketball-reference.com/boxscores/202210270SAC.html")
+print(data)
+
 #print(data)
 # TODO: get every box-score (DONE!)
 # TODO: get player stats from each box score (DONE!)
