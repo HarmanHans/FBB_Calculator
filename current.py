@@ -7,9 +7,15 @@ import pymongo
 from pymongo import MongoClient
 
 
-MONTHS = ["october", "november", "december"]
+MONTHS = ["october", "november", "december", "january"]
 links = []
 data = []
+convert_days = {
+    "October": 0,
+    "November": 14,
+    "December": 44,
+    "January": 75
+}
 
 # converts strings that should be numbers into floats
 # param: A string that represents an individual stat
@@ -85,10 +91,22 @@ def get_player_position():
             profile['pos'] = posEligibility
             data.append(profile)
 
-        
+# converts the date a game took place to how many days it was from tipoff day
+# param: (heading) - the heading on the page that contains the date
+# returns: (day) - the int representing distance from tipoff day
+def convert_date(date_heading):
+    day = 0
+    date_header = date_heading.split(",")
+    date_split = date_header[1].split(" ")
+    if (date_split[1] == "October"):
+        day = day + convert_days[date_split[1]] + int(date_split[2]) - 18
+    else:
+        day = day + convert_days[date_split[1]] + int(date_split[2]) - 1
+    return day
+      
 
 # retrieves the box score of every single NBA game played in the months given to it.
-# param: the month we are getting data from
+# param: (month) - the month we are getting data from
 def scrape_game_links(month):
     print(month)
     url = f"https://www.basketball-reference.com/leagues/NBA_2023_games-{month}.html"
@@ -107,6 +125,8 @@ def scrape_player_data(link):
     soup = open_page(link)
     matchup = soup.find("table", {"id": "line_score"})
     team_boxes = matchup.find_all("th", {"data-stat": "team"})
+    date_heading = soup.find("h1").get_text()
+    day = convert_date(date_heading)
     for team_box in team_boxes:
         if (team_box.find("a") is not None):
             name = team_box.find("a").get_text()
@@ -115,22 +135,23 @@ def scrape_player_data(link):
         body = table.find("tbody")
         rows = body.find_all("tr", {"class": None})
         results = results + rows
-    return results
+    return [results, day]
 
 # given each players statline from the website, this method cleans the data 
 # and divides it into separate stats
 # param: a list of player data
-def clean_player_data(results):
+def clean_player_data(results, day):
     for result in results:
         datum = {}
 
         nameBox = result.find("th", {"data-stat": "player"})
         name = nameBox.find("a").get_text()
 
-        
-        pos_list = get_player_position(name)
-
-
+        pos_list = get_player_position(name) # change to get position from dictionary
+ 
+        #get h1 from bballref
+        #split date off
+        # use date as key to add game to dictionary
 
         # if player did not play
         if (result.find("td", {"data-stat": "reason"})):
@@ -210,11 +231,11 @@ def clean_player_data(results):
 #print(data)
 
 # Testing:
-#results = scrape_player_data("https://www.basketball-reference.com/boxscores/202210180BOS.html")
+results = scrape_player_data("https://www.basketball-reference.com/boxscores/202210270SAC.html")
 #clean_player_data(results)
 #print(data)
-get_player_position()
-print(data)
+#get_player_position()
+#print(data)
 # TODO: get every box-score (DONE!)
 # TODO: get player stats from each box score (DONE!)
 # TODO: every player needs to have their stats from each game (probably done, either that or simple to do)
