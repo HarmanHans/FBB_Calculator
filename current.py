@@ -139,19 +139,19 @@ def append_data(datum, name):
                 if (datum['minutes'] > -1):
                     dict['season_averages']['games'] = dict['season_averages']['games'] + 1
                     games = dict['season_averages']['games']
-                    dict['season_averages']['minutes'] = (dict['season_averages']['minutes'] + datum['minutes']) / games
+                    dict['season_averages']['minutes'] = round((dict['season_averages']['minutes'] + datum['minutes']) / games, 2)
                     dict['season_averages']['fg'] = (dict['season_averages']['fg'] + datum['fg']) / games
                     dict['season_averages']['attempts'] = (dict['season_averages']['attempts'] + datum['attempts']) / games
-                    if (datum['fg_pct'] > -1):
-                        dict['season_averages']['fg_pct'] = (dict['season_averages']['fg_pct'] + datum['fg_pct']) / games
+                    if (datum['fg'] > 0):
+                        dict['season_averages']['fg_pct'] = round((dict['season_averages']['fg_pct'] + (datum['fg'] / datum['attempts'])), 4)
                     dict['season_averages']['fg3'] = (dict['season_averages']['fg3'] + datum['fg3']) / games
                     dict['season_averages']['fg3_attempts'] = (dict['season_averages']['fg3_attempts'] + datum['fg3_attempts']) / games
-                    if (datum['fg3_pct'] > -1):
-                        dict['season_averages']['fg3_pct'] = (dict['season_averages']['fg3_pct'] + datum['fg3_pct']) / games
+                    if (datum['fg3_attempts'] > 0):
+                        dict['season_averages']['fg3_pct'] = round((dict['season_averages']['fg3_pct'] + (datum['fg3'] / datum['fg3_attempts'])), 4)
                     dict['season_averages']['ft'] = (dict['season_averages']['ft'] + datum['ft']) / games
                     dict['season_averages']['ft_attempts'] = (dict['season_averages']['ft_attempts'] + datum['ft_attempts']) / games
-                    if (datum['ft_pct']):
-                        dict['season_averages']['ft_pct'] = (dict['season_averages']['ft_pct'] + datum['ft_pct']) / games
+                    if (datum['ft_attempts'] > 0):
+                        dict['season_averages']['ft_pct'] = round((dict['season_averages']['ft_pct'] + (datum['ft'] / datum['ft_attempts'])), 4)
                     dict['season_averages']['orb'] = (dict['season_averages']['orb'] + datum['orb']) / games
                     dict['season_averages']['drb'] = (dict['season_averages']['drb'] + datum['drb']) / games
                     dict['season_averages']['reb'] = (dict['season_averages']['reb'] + datum['reb']) / games
@@ -286,9 +286,9 @@ def scrape_player_data(link):
 # Testing:
 get_player_position()
 scrape_player_data("https://www.basketball-reference.com/boxscores/202210270SAC.html")
+scrape_player_data("https://www.basketball-reference.com/boxscores/202212230PHO.html")
 print(data)
 
-#print(data)
 # TODO: get every box-score (DONE!)
 # TODO: get player stats from each box score (DONE!)
 # TODO: every player needs to have their stats from each game (probably done, either that or simple to do)
