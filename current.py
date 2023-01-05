@@ -78,6 +78,29 @@ def get_player_position():
     nameRows = table.find_all("tr")
     for nameRow in nameRows:
         profile = {}
+        season_averages = {
+            'games': 0,
+            'minutes': 0,
+            'fg': 0,
+            'attempts': 0,
+            'fg_pct': 0,
+            'fg3': 0,
+            'fg3_attempts': 0,
+            'fg3_pct': 0,
+            'ft': 0,
+            'ft_attempts': 0,
+            'ft_pct': 0,
+            'orb': 0,
+            'drb': 0,
+            'reb': 0,
+            'ast': 0,
+            'stl': 0,
+            'blk': 0,
+            'turnovers': 0,
+            'fouls': 0,
+            'pts': 0,
+            'plus_minus': 0
+        }
         nameBox = nameRow.find("a")
         if (nameBox is not None):
             name = nameBox.get_text()
@@ -90,6 +113,7 @@ def get_player_position():
             profile['name'] = name
             profile['pos'] = posEligibility
             profile['games'] = []
+            profile['season_averages'] = season_averages
             data.append(profile)
 
 # converts the date a game took place to how many days it was from tipoff day
@@ -104,7 +128,43 @@ def convert_date(date_heading):
     else:
         day = day + convert_days[date_split[1]] + int(date_split[2]) - 1
     return day
-      
+
+# adds data for a particular game into entire database
+# param: (datum) - the stats set for an entire game
+# param: (name) - the name of the given player
+def append_data(datum, name):
+    for dict in data:
+            if (name == dict['name']):
+                dict['games'].append(datum)
+                if (datum['minutes'] > -1):
+                    dict['season_averages']['games'] = dict['season_averages']['games'] + 1
+                    games = dict['season_averages']['games']
+                    dict['season_averages']['minutes'] = (dict['season_averages']['minutes'] + datum['minutes']) / games
+                    dict['season_averages']['fg'] = (dict['season_averages']['fg'] + datum['fg']) / games
+                    dict['season_averages']['attempts'] = (dict['season_averages']['attempts'] + datum['attempts']) / games
+                    if (datum['fg_pct'] > -1):
+                        dict['season_averages']['fg_pct'] = (dict['season_averages']['fg_pct'] + datum['fg_pct']) / games
+                    dict['season_averages']['fg3'] = (dict['season_averages']['fg3'] + datum['fg3']) / games
+                    dict['season_averages']['fg3_attempts'] = (dict['season_averages']['fg3_attempts'] + datum['fg3_attempts']) / games
+                    if (datum['fg3_pct'] > -1):
+                        dict['season_averages']['fg3_pct'] = (dict['season_averages']['fg3_pct'] + datum['fg3_pct']) / games
+                    dict['season_averages']['ft'] = (dict['season_averages']['ft'] + datum['ft']) / games
+                    dict['season_averages']['ft_attempts'] = (dict['season_averages']['ft_attempts'] + datum['ft_attempts']) / games
+                    if (datum['ft_pct']):
+                        dict['season_averages']['ft_pct'] = (dict['season_averages']['ft_pct'] + datum['ft_pct']) / games
+                    dict['season_averages']['orb'] = (dict['season_averages']['orb'] + datum['orb']) / games
+                    dict['season_averages']['drb'] = (dict['season_averages']['drb'] + datum['drb']) / games
+                    dict['season_averages']['reb'] = (dict['season_averages']['reb'] + datum['reb']) / games
+                    dict['season_averages']['ast'] = (dict['season_averages']['ast'] + datum['ast']) / games
+                    dict['season_averages']['stl'] = (dict['season_averages']['stl'] + datum['stl']) / games
+                    dict['season_averages']['blk'] = (dict['season_averages']['blk'] + datum['blk']) / games
+                    dict['season_averages']['turnovers'] = (dict['season_averages']['turnovers'] + datum['turnovers']) / games
+                    dict['season_averages']['fouls'] = (dict['season_averages']['fouls'] + datum['fouls']) / games
+                    dict['season_averages']['pts'] = (dict['season_averages']['pts'] + datum['pts']) / games
+                    if (datum['plus_minus'] is not None):
+                        dict['season_averages']['plus_minus'] = (dict['season_averages']['plus_minus'] + datum['plus_minus']) / games
+
+
 # retrieves the box score of every single NBA game played in the months given to it.
 # param: (month) - the month we are getting data from
 def scrape_game_links(month):
@@ -194,9 +254,7 @@ def clean_player_data(results, day):
         datum['pts'] = pts
         datum['plus_minus'] = plus_minus
 
-        for dict in data:
-            if (name == dict['name']):
-                dict['games'].append(datum)
+        append_data(datum, name)
 
 # given a box score page, scrapes stats of each player who played
 # param: A url (string form) to the box score we're extracting data from
