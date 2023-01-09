@@ -178,8 +178,8 @@ def scrape_game_links(month):
 
 # given each players statline from the website, this method cleans the data 
 # and divides it into separate stats
-# param: (results) a list of player data
-# param: (day) distance from tip off day that game took place
+# param: (results) - a list of player data
+# param: (day) - distance from tip off day that game took place
 def clean_player_data(results, day):
     for result in results:
         datum = {}
