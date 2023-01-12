@@ -24,6 +24,9 @@ diff = (intDate - tipOff).days
 
 url = f"https://www.basketball-reference.com/boxscores/?month={month}&day={day}&year={year}"
 
+# opens a webpage to extract its url
+# param: a string that represents a url
+# returns: an html of the given page to process
 def open_page(url):
     browser = webdriver.Chrome()
     browser.get(url)
@@ -32,6 +35,7 @@ def open_page(url):
     soup = BeautifulSoup(html, 'html.parser')
     return soup
 
+# retrieves the box score of every single NBA game played in the months given to it.
 def scrape_game_links():
     soup = open_page(url)
     linkBoxes = soup.find_all("p", {"class": "links"})
