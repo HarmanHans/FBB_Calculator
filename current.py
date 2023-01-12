@@ -17,6 +17,12 @@ convert_days = {
     "January": 75
 }
 
+# access database
+load_dotenv()
+username = os.getenv("USERNAME_MONGO")
+password = os.geten("PASSWORD_MONGO")
+# cluster = pymongo.MongoClient(f"mongodb+srv://{username}:{password}@nodecluster.gknsvxa.mongodb.net/?retryWrites=true&w=majority")
+
 # converts strings that should be numbers into floats
 # param: A string that represents an individual stat
 # returns: returns the string converted into a float
@@ -299,6 +305,10 @@ print(data)
 # TODO: find way to store players and their positions. then when we find a player in a box score, we add their game stats to the players identity (DONE!)
     # probably in JSON form
 
+
+# The value in players is how good they are compared to average and how unique they are
+# the difference between a player and the 10th best player in that category matters to see top end potential
+# how far off the average are players? if most people are closer to average, then i guess the difference matters more. 
 
 
 

@@ -7,10 +7,13 @@ from datetime import timedelta
 import json
 import pymongo
 from pymongo import MongoClient
+from dotenv import load_dotenv
 
 # needs to be until the last day of the NBA regular season
 links = []
 data = []
+
+load_dotenv()
 
 currentDay = str(date.today() - timedelta(days = 1))
 dateString = currentDay.split("-")
