@@ -182,3 +182,4 @@ print(data)
 # update valid positions
 # how to append this data to the right place in mongoDB
 # how to hide api keys and still be able to publish website
+# might be better to do player averages here to see who the top 200, top 120, etc. are

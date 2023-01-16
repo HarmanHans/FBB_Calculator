@@ -5,10 +5,14 @@ import time
 import json
 import pymongo
 from pymongo import MongoClient
+from dotenv import load_dotenv
+import chromedriver_autoinstaller as chromedriver
 
+chromedriver.install()
 
 MONTHS = ["october", "november", "december", "january"]
 links = []
+all_data = {}
 data = []
 convert_days = {
     "October": 0,
@@ -17,11 +21,38 @@ convert_days = {
     "January": 75
 }
 
+player_averages = {
+    "games": 0,
+    "fg_pct": 0,
+    "ft_pct": 0,
+    "fg3": 0,
+    "pts": 0,
+    "reb": 0,
+    "ast": 0,
+    "st": 0,
+    "blk": 0,
+    "to": 0,
+    "total": 0
+}
+
+positonal_value = {
+    "fg_pct": 0,
+    "ft_pct": 0,
+    "fg3": 0,
+    "pts": 0,
+    "reb": 0,
+    "ast": 0,
+    "st": 0,
+    "blk": 0,
+    "to": 0,
+    "total": 0
+}
+
 # access database
 load_dotenv()
 username = os.getenv("USERNAME_MONGO")
-password = os.geten("PASSWORD_MONGO")
-# cluster = pymongo.MongoClient(f"mongodb+srv://{username}:{password}@nodecluster.gknsvxa.mongodb.net/?retryWrites=true&w=majority")
+password = os.getenv("PASSWORD_MONGO")
+cluster = pymongo.MongoClient(f"mongodb+srv://{username}:{password}@nodecluster.gknsvxa.mongodb.net/?retryWrites=true&w=majority")
 
 # converts strings that should be numbers into floats
 # param: A string that represents an individual stat
@@ -169,6 +200,10 @@ def append_data(datum, name):
                     dict['season_averages']['pts'] = (dict['season_averages']['pts'] + datum['pts']) / games
                     if (datum['plus_minus'] is not None):
                         dict['season_averages']['plus_minus'] = (dict['season_averages']['plus_minus'] + datum['plus_minus']) / games
+                
+                    #player_averages['games'] += 1
+                    #player_averages['pts'] = (player_averages['pts'] + datum['pts']) / player_averages[games]
+
 
 
 # retrieves the box score of every single NBA game played in the months given to it.
@@ -290,10 +325,15 @@ def scrape_player_data(link):
 #print(data)
 
 # Testing:
-get_player_position()
-scrape_player_data("https://www.basketball-reference.com/boxscores/202210270SAC.html")
-scrape_player_data("https://www.basketball-reference.com/boxscores/202212230PHO.html")
-print(data)
+#get_player_position()
+#scrape_player_data("https://www.basketball-reference.com/boxscores/202210270SAC.html")
+#scrape_player_data("https://www.basketball-reference.com/boxscores/202212230PHO.html")
+#scrape_player_data("https://www.basketball-reference.com/boxscores/202301130DET.html")
+db = cluster["basketball-data"]
+#collection = db["stats"]
+average_collection = db["player-averages"]
+#collection.insert_many(data)
+average_collection.insert_one(player_averages)
 
 # TODO: get every box-score (DONE!)
 # TODO: get player stats from each box score (DONE!)
