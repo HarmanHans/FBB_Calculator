@@ -12,6 +12,25 @@ from dotenv import load_dotenv
 # needs to be until the last day of the NBA regular season
 links = []
 data = []
+# number of players to sort by in table
+filters = [50, 100, 120, 150, 200]
+
+metrics = ['fg_pct', 'ft_pct', 'fg3', 'pts', 'reb', 'ast', 'st', 'blk', 'to']
+
+#sample player average dataset
+summation = {
+    'games': 0,
+    'fg_pct': 0,
+    'ft_pct': 0,
+    'fg3': 0,
+    'pts': 0,
+    'reb': 0,
+    'ast': 0,
+    'st': 0,
+    'blk': 0,
+    'to': 0,
+    'total': 0
+}
 
 load_dotenv()
 
@@ -188,10 +207,25 @@ if ((intDate - lastDay).days <= 0):
     cluster = pymongo.MongoClient(f"mongodb+srv://{username}:{password}@nodecluster.gknsvxa.mongodb.net/?retryWrites=true&w=majority")
     db = cluster["basketball-data"]
     collection = db["stats"]
+    average_collection = db["player-averages"]
     complete_data = list(collection.find({}))
-    print(complete_data)
+    average_stats = list(average_collection.find({}))
     
-    
+    # finds the average of a given metric based on how many players are compared
+    # param: (metric) - String. represents metric that we are comparing.
+    # param: (count) - int. represents the top (count) players we are comparing.
+    def average_data(metric, count):
+        sorted_list = sorted(complete_data, key=lambda i : i['season_averages'][metric], reverse=True)
+        player_count = 0
+        sum = 0
+        for item in sorted_list:
+            if (item['season_averages']['games'] > 0 and player_count < count):
+                player_count += 1
+                sum += item['season_averages'][metric]
+        print(sum / player_count)
+
+    average_data('pts', 5)
+
     
     # update valid positions
     # how to append this data to the right place in mongoDB
