@@ -11,6 +11,9 @@ import chromedriver_autoinstaller as chromedriver
 chromedriver.install()
 
 MONTHS = ["october", "november", "december", "january"]
+filters = [50, 100, 120, 150, 200, 300, 1000]
+metrics = ['fg_pct', 'ft_pct', 'fg3', 'pts', 'reb', 'ast', 'st', 'blk', 'to']
+averages = []
 links = []
 all_data = {}
 data = []
@@ -21,32 +24,22 @@ convert_days = {
     "January": 75
 }
 
-player_averages = {
-    "games": 0,
-    "fg_pct": 0,
-    "ft_pct": 0,
-    "fg3": 0,
-    "pts": 0,
-    "reb": 0,
-    "ast": 0,
-    "st": 0,
-    "blk": 0,
-    "to": 0,
-    "total": 0
-}
 
-positonal_value = {
-    "fg_pct": 0,
-    "ft_pct": 0,
-    "fg3": 0,
-    "pts": 0,
-    "reb": 0,
-    "ast": 0,
-    "st": 0,
-    "blk": 0,
-    "to": 0,
-    "total": 0
-}
+for i in filters:
+    average_stats = {}
+
+    average_stats['key'] = i
+    average_stats['fg_pct'] = 0
+    average_stats['ft_pct'] = 0
+    average_stats['fg3'] = 0
+    average_stats['pts'] = 0
+    average_stats['reb'] = 0
+    average_stats['ast'] = 0
+    average_stats['st'] = 0
+    average_stats['blk'] = 0
+    average_stats['to'] = 0
+    averages.append(average_stats) 
+
 
 # access database
 load_dotenv()
@@ -333,7 +326,7 @@ db = cluster["basketball-data"]
 #collection = db["stats"]
 average_collection = db["player-averages"]
 #collection.insert_many(data)
-average_collection.insert_one(player_averages)
+average_collection.insert_many(averages)
 
 # TODO: get every box-score (DONE!)
 # TODO: get player stats from each box score (DONE!)

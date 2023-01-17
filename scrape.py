@@ -13,24 +13,9 @@ from dotenv import load_dotenv
 links = []
 data = []
 # number of players to sort by in table
-filters = [50, 100, 120, 150, 200]
+filters = [50, 100, 120, 150, 200, 300, 1000]
 
 metrics = ['fg_pct', 'ft_pct', 'fg3', 'pts', 'reb', 'ast', 'st', 'blk', 'to']
-
-#sample player average dataset
-summation = {
-    'games': 0,
-    'fg_pct': 0,
-    'ft_pct': 0,
-    'fg3': 0,
-    'pts': 0,
-    'reb': 0,
-    'ast': 0,
-    'st': 0,
-    'blk': 0,
-    'to': 0,
-    'total': 0
-}
 
 load_dotenv()
 
