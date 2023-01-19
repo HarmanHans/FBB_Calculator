@@ -12,8 +12,10 @@ chromedriver.install()
 
 MONTHS = ["october", "november", "december", "january"]
 filters = [50, 100, 120, 150, 200, 300, 1000]
+positions = ["PG", "SG", "SF", "PF", "C"]
 metrics = ['fg_pct', 'ft_pct', 'fg3', 'pts', 'reb', 'ast', 'st', 'blk', 'to']
-averages = []
+player_averages = []
+positional_averages = []
 links = []
 all_data = {}
 data = []
@@ -24,22 +26,27 @@ convert_days = {
     "January": 75
 }
 
+# creates average datasets based on either top players or positions
+# param: (qualifier) - whether this average set is sorted by position or top X players.
+# param: (list) - the specific list we are storing this data in
+def create_average_set(qualifier, list):
+    for i in qualifier:
+        average_stats = {}
 
-for i in filters:
-    average_stats = {}
+        average_stats['key'] = i
+        average_stats['fg_pct'] = 0
+        average_stats['ft_pct'] = 0
+        average_stats['fg3'] = 0
+        average_stats['pts'] = 0
+        average_stats['reb'] = 0
+        average_stats['ast'] = 0
+        average_stats['stl'] = 0
+        average_stats['blk'] = 0
+        average_stats['turnovers'] = 0
+        list.append(average_stats) 
 
-    average_stats['key'] = i
-    average_stats['fg_pct'] = 0
-    average_stats['ft_pct'] = 0
-    average_stats['fg3'] = 0
-    average_stats['pts'] = 0
-    average_stats['reb'] = 0
-    average_stats['ast'] = 0
-    average_stats['st'] = 0
-    average_stats['blk'] = 0
-    average_stats['to'] = 0
-    averages.append(average_stats) 
-
+create_average_set(filters, player_averages)
+create_average_set(positions, positional_averages)
 
 # access database
 load_dotenv()
@@ -325,8 +332,10 @@ def scrape_player_data(link):
 db = cluster["basketball-data"]
 #collection = db["stats"]
 average_collection = db["player-averages"]
+pos_collection = db["positional-averages"]
 #collection.insert_many(data)
-average_collection.insert_many(averages)
+average_collection.insert_many(player_averages)
+pos_collection.insert_many(positional_averages)
 
 # TODO: get every box-score (DONE!)
 # TODO: get player stats from each box score (DONE!)

@@ -15,7 +15,8 @@ data = []
 # number of players to sort by in table
 filters = [50, 100, 120, 150, 200, 300, 1000]
 
-metrics = ['fg_pct', 'ft_pct', 'fg3', 'pts', 'reb', 'ast', 'st', 'blk', 'to']
+metrics = ['fg_pct', 'ft_pct', 'fg3', 'pts', 'reb', 'ast', 'stl', 'blk', 'turnovers']
+rate_metrics = ['fg_pct', 'ft_pct']
 
 load_dotenv()
 
@@ -193,26 +194,52 @@ if ((intDate - lastDay).days <= 0):
     db = cluster["basketball-data"]
     collection = db["stats"]
     average_collection = db["player-averages"]
+    positional_collection = db["positional-averages"]
     complete_data = list(collection.find({}))
     average_stats = list(average_collection.find({}))
+    position_stats = list(positional_collection.find({}))
     
     # finds the average of a given metric based on how many players are compared
+    # param: (stat_set) - Dictionary. dictionary containing averages of top X players.
     # param: (metric) - String. represents metric that we are comparing.
-    # param: (count) - int. represents the top (count) players we are comparing.
-    def average_data(metric, count):
+    def average_data(stat_set, metric):
+        limit = stat_set['key']
         sorted_list = sorted(complete_data, key=lambda i : i['season_averages'][metric], reverse=True)
         player_count = 0
         sum = 0
         for item in sorted_list:
-            if (item['season_averages']['games'] > 0 and player_count < count):
+            if (item['season_averages']['games'] > 0 and player_count < limit):
                 player_count += 1
                 sum += item['season_averages'][metric]
-        print(sum / player_count)
-
-    average_data('pts', 5)
-
+        stat_set[metric] = (sum / player_count)
     
+    def positional_averaging(stat_set, metric):
+        sum = 0
+        player_count = 0
+        for item in complete_data:
+            if (stat_set['key'] in item['pos'] and item['season_averages']['games'] > 0):
+                player_count += 1
+                sum += item['season_averages'][metric]
+        stat_set[metric] = (sum / player_count)
+
+
+
+    #for stat_set in average_stats:
+    #    for metric in metrics:
+    #        average_data(stat_set, metric)
+
+    for item in complete_data:
+        if (item['season_averages']['games'] > 0 and item['season_averages']['ft_pct'] == 0):
+            print(item['name'])
+
+    for stat_set in position_stats:
+        for metric in metrics:
+            positional_averaging(stat_set, metric)  
+    #print(position_stats)
+
     # update valid positions
     # how to append this data to the right place in mongoDB
     # how to hide api keys and still be able to publish website
     # might be better to do player averages here to see who the top 200, top 120, etc. are
+
+    #every 12th person gets duplicated, maybe could have a variable and if variable % 13 == 0, then don't add to data
