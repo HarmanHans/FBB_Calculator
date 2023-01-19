@@ -16,7 +16,6 @@ data = []
 filters = [50, 100, 120, 150, 200, 300, 1000]
 
 metrics = ['fg_pct', 'ft_pct', 'fg3', 'pts', 'reb', 'ast', 'stl', 'blk', 'turnovers']
-rate_metrics = ['fg_pct', 'ft_pct']
 
 load_dotenv()
 
@@ -217,6 +216,13 @@ if ((intDate - lastDay).days <= 0):
         sum = 0
         player_count = 0
         for item in complete_data:
+            # could check if metric is rate metric and if there are 0 attempts, just go next
+            if (metric == 'fg_pct'):
+                if (item['season_averages']['attempts'] == 0):
+                    continue
+            if (metric == 'ft_pct'):
+                if (item['season_averages']['ft_attempts'] == 0):
+                    continue
             if (stat_set['key'] in item['pos'] and item['season_averages']['games'] > 0):
                 player_count += 1
                 sum += item['season_averages'][metric]
@@ -228,14 +234,10 @@ if ((intDate - lastDay).days <= 0):
     #    for metric in metrics:
     #        average_data(stat_set, metric)
 
-    for item in complete_data:
-        if (item['season_averages']['games'] > 0 and item['season_averages']['ft_pct'] == 0):
-            print(item['name'])
-
     for stat_set in position_stats:
         for metric in metrics:
             positional_averaging(stat_set, metric)  
-    #print(position_stats)
+    print(position_stats)
 
     # update valid positions
     # how to append this data to the right place in mongoDB
