@@ -232,12 +232,14 @@ if ((intDate - lastDay).days <= 0):
     # param: (stat_set) - Dictionary. dictionary containing the stats of players.
     # param: (metric) - String. represents metric that we are comparing.
     def positional_averaging(stat_set, metric):
+        limit = stat_set['filter']
+        sorted_list = sorted(complete_data, key=lambda i : i['season_averages'][metric], reverse=True)
         sum = 0
         player_count = 0
-        for item in complete_data:
+        for item in sorted_list:
             if(is_rate_stat(item, metric)):
                 continue
-            if (stat_set['key'] in item['pos'] and item['season_averages']['games'] > 0):
+            if (stat_set['key'] in item['pos'] and item['season_averages']['games'] > 0 and player_count < limit):
                 player_count += 1
                 sum += item['season_averages'][metric]
         stat_set['games'] = player_count

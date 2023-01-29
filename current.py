@@ -62,7 +62,6 @@ def filterize_positional_averages():
 
 filterize_positional_averages()
 
-print(positional_averages)
 # access database
 load_dotenv()
 username = os.getenv("USERNAME_MONGO")
@@ -337,51 +336,6 @@ def scrape_player_data(link):
         results = results + rows
     clean_player_data(results, day, 1)
 
-# checks if a metric is a rate stat, returns whether or not the rate stat has any attempts to make it valid
-# param: (item) - individual player's stats
-# param: (metric) - the stat being analyzed
-def is_rate_stat(item, metric):
-    if (metric == 'fg_pct'):
-            if (item['season_averages']['attempts'] == 0):
-                return True
-    if (metric == 'ft_pct'):
-        if (item['season_averages']['ft_attempts'] == 0):
-            return True
-    return False
-    
-# finds the average of a given metric based on how many players are compared
-# param: (stat_set) - Dictionary. dictionary containing averages of top X players.
-# param: (metric) - String. represents metric that we are comparing.
-def average_data(stat_set, metric):
-    limit = stat_set['key']
-    sorted_list = sorted(data, key=lambda i : i['season_averages'][metric], reverse=True)
-    sum = 0
-    player_count = 0
-
-    for item in sorted_list:
-        if(is_rate_stat(item, metric)):
-            continue
-        if (item['season_averages']['games'] > 0 and player_count < limit):
-            player_count += 1
-            sum += item['season_averages'][metric]
-    stat_set['games'] = player_count
-    stat_set[metric] = (sum / stat_set['games'])
-
-# finds the average stats by position
-    # param: (stat_set) - Dictionary. dictionary containing the stats of players.
-    # param: (metric) - String. represents metric that we are comparing.
-def positional_averaging(stat_set, metric):
-    sum = 0
-    player_count = 0
-    for item in data:
-        if(is_rate_stat(item, metric)):
-            continue
-        if (stat_set['key'] in item['pos'] and item['season_averages']['games'] > 0):
-            player_count += 1
-            sum += item['season_averages'][metric]
-    stat_set['games'] = player_count
-    stat_set[metric] = (sum / player_count)
-
 #for month in MONTHS:
 #    scrape_game_links(month)
 #for link in links:
@@ -408,8 +362,8 @@ pos_collection = db["positional-averages"]
 #    for metric in metrics:
 #        positional_averaging(stat_set, metric)
 
-#average_collection.insert_many(player_averages)
-# pos_collection.insert_many(positional_averages)
+average_collection.insert_many(player_averages)
+pos_collection.insert_many(positional_averages)
 
 
 
