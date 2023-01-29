@@ -47,8 +47,22 @@ def create_average_set(qualifier, list):
         list.append(average_stats) 
 
 create_average_set(filters, player_averages)
-create_average_set(positions, positional_averages)
+for i in range(1, len(filters)):
+    create_average_set(positions, positional_averages)
 
+def filterize_positional_averages():
+    count = 1
+    index = 0
+    for dict in positional_averages:
+        dict['filter'] = filters[index]
+        if (count == 5):
+            count = 0
+            index += 1
+        count += 1
+
+filterize_positional_averages()
+
+print(positional_averages)
 # access database
 load_dotenv()
 username = os.getenv("USERNAME_MONGO")
@@ -386,16 +400,18 @@ average_collection = db["player-averages"]
 pos_collection = db["positional-averages"]
 #collection.insert_many(data)
 
-for stat_set in player_averages:
-    for metric in metrics:
-        average_data(stat_set, metric)
+#for stat_set in player_averages:
+#    for metric in metrics:
+#        average_data(stat_set, metric)
 
-for stat_set in positional_averages:
-    for metric in metrics:
-        positional_averaging(stat_set, metric)
+#for stat_set in positional_averages:
+#    for metric in metrics:
+#        positional_averaging(stat_set, metric)
 
-average_collection.insert_many(player_averages)
-pos_collection.insert_many(positional_averages)
+#average_collection.insert_many(player_averages)
+# pos_collection.insert_many(positional_averages)
+
+
 
 # TODO: get every box-score (DONE!)
 # TODO: get player stats from each box score (DONE!)
