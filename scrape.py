@@ -227,6 +227,7 @@ if ((intDate - lastDay).days <= 0):
                 sum += item['season_averages'][metric]
         stat_set['games'] = player_count
         stat_set[metric] = (sum / stat_set['games'])
+        average_collection.replace_one({'_id': stat_set['_id']}, stat_set)
     
     # finds the average stats by position
     # param: (stat_set) - Dictionary. dictionary containing the stats of players.
@@ -244,6 +245,8 @@ if ((intDate - lastDay).days <= 0):
                 sum += item['season_averages'][metric]
         stat_set['games'] = player_count
         stat_set[metric] = (sum / player_count)
+        positional_collection.replace_one({'_id': stat_set['_id']}, stat_set)
+
     # need to update these two items, not create them fresh
 
 
@@ -254,7 +257,8 @@ if ((intDate - lastDay).days <= 0):
     for stat_set in position_stats:
         for metric in metrics:
             positional_averaging(stat_set, metric)  
-    print(position_stats)
+    
+    
 
     # update valid positions
     # how to append this data to the right place in mongoDB
