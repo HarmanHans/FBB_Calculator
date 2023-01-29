@@ -215,7 +215,6 @@ if ((intDate - lastDay).days <= 0):
     # param: (metric) - String. represents metric that we are comparing.
     def average_data(stat_set, metric):
         limit = stat_set['key']
-        print(limit)
         sorted_list = sorted(complete_data, key=lambda i : i['season_averages'][metric], reverse=True)
         sum = 0
         player_count = 0
@@ -227,7 +226,6 @@ if ((intDate - lastDay).days <= 0):
                 player_count += 1
                 sum += item['season_averages'][metric]
         stat_set['games'] = player_count
-        print(stat_set['games'])
         stat_set[metric] = (sum / stat_set['games'])
     
     # finds the average stats by position
@@ -237,24 +235,24 @@ if ((intDate - lastDay).days <= 0):
         sum = 0
         player_count = 0
         for item in complete_data:
-            # could check if metric is rate metric and if there are 0 attempts, just go next
-            if(is_rate_stat(metric)):
+            if(is_rate_stat(item, metric)):
                 continue
             if (stat_set['key'] in item['pos'] and item['season_averages']['games'] > 0):
                 player_count += 1
                 sum += item['season_averages'][metric]
+        stat_set['games'] = player_count
         stat_set[metric] = (sum / player_count)
-
+    # need to update these two items, not create them fresh
 
 
     for stat_set in average_stats:
         for metric in metrics:
             average_data(stat_set, metric)
 
-    #for stat_set in position_stats:
-    #    for metric in metrics:
-    #        positional_averaging(stat_set, metric)  
-    print(average_stats)
+    for stat_set in position_stats:
+        for metric in metrics:
+            positional_averaging(stat_set, metric)  
+    print(position_stats)
 
     # update valid positions
     # how to append this data to the right place in mongoDB
