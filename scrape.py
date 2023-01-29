@@ -197,32 +197,49 @@ if ((intDate - lastDay).days <= 0):
     complete_data = list(collection.find({}))
     average_stats = list(average_collection.find({}))
     position_stats = list(positional_collection.find({}))
+
+    # checks if a metric is a rate stat, returns whether or not the rate stat has any attempts to make it valid
+    # param: (item) - individual player's stats
+    # param: (metric) - the stat being analyzed
+    def is_rate_stat(item, metric):
+        if (metric == 'fg_pct'):
+                if (item['season_averages']['attempts'] == 0):
+                    return True
+        if (metric == 'ft_pct'):
+            if (item['season_averages']['ft_attempts'] == 0):
+                return True
+        return False
     
     # finds the average of a given metric based on how many players are compared
     # param: (stat_set) - Dictionary. dictionary containing averages of top X players.
     # param: (metric) - String. represents metric that we are comparing.
     def average_data(stat_set, metric):
         limit = stat_set['key']
+        print(limit)
         sorted_list = sorted(complete_data, key=lambda i : i['season_averages'][metric], reverse=True)
-        player_count = 0
         sum = 0
+        player_count = 0
+
         for item in sorted_list:
+            if(is_rate_stat(item, metric)):
+                continue
             if (item['season_averages']['games'] > 0 and player_count < limit):
                 player_count += 1
                 sum += item['season_averages'][metric]
-        stat_set[metric] = (sum / player_count)
+        stat_set['games'] = player_count
+        print(stat_set['games'])
+        stat_set[metric] = (sum / stat_set['games'])
     
+    # finds the average stats by position
+    # param: (stat_set) - Dictionary. dictionary containing the stats of players.
+    # param: (metric) - String. represents metric that we are comparing.
     def positional_averaging(stat_set, metric):
         sum = 0
         player_count = 0
         for item in complete_data:
             # could check if metric is rate metric and if there are 0 attempts, just go next
-            if (metric == 'fg_pct'):
-                if (item['season_averages']['attempts'] == 0):
-                    continue
-            if (metric == 'ft_pct'):
-                if (item['season_averages']['ft_attempts'] == 0):
-                    continue
+            if(is_rate_stat(metric)):
+                continue
             if (stat_set['key'] in item['pos'] and item['season_averages']['games'] > 0):
                 player_count += 1
                 sum += item['season_averages'][metric]
@@ -230,18 +247,19 @@ if ((intDate - lastDay).days <= 0):
 
 
 
-    #for stat_set in average_stats:
-    #    for metric in metrics:
-    #        average_data(stat_set, metric)
-
-    for stat_set in position_stats:
+    for stat_set in average_stats:
         for metric in metrics:
-            positional_averaging(stat_set, metric)  
-    print(position_stats)
+            average_data(stat_set, metric)
+
+    #for stat_set in position_stats:
+    #    for metric in metrics:
+    #        positional_averaging(stat_set, metric)  
+    print(average_stats)
 
     # update valid positions
     # how to append this data to the right place in mongoDB
     # how to hide api keys and still be able to publish website
     # might be better to do player averages here to see who the top 200, top 120, etc. are
 
-    #every 12th person gets duplicated, maybe could have a variable and if variable % 13 == 0, then don't add to data
+    # every 12th person gets duplicated, maybe could have a variable and if variable % 13 == 0, then don't add to data
+    # how to actually do averages. this current method won't work past the first use. need to consistently monitor the amount of games we are dividing by.

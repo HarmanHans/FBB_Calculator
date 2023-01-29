@@ -34,6 +34,7 @@ def create_average_set(qualifier, list):
         average_stats = {}
 
         average_stats['key'] = i
+        average_stats['games'] = 0
         average_stats['fg_pct'] = 0
         average_stats['ft_pct'] = 0
         average_stats['fg3'] = 0
@@ -221,8 +222,13 @@ def scrape_game_links(month):
 # and divides it into separate stats
 # param: (results) - a list of player data
 # param: (day) - distance from tip off day that game took place
-def clean_player_data(results, day):
+# param: (count) - int representing index of players being added
+def clean_player_data(results, day, count):
     for result in results:
+        # trying to fix 12th player duplication
+        count += 1
+        if (count % 13 == 0):
+            continue
         datum = {}
 
         nameBox = result.find("th", {"data-stat": "player"})
@@ -315,7 +321,7 @@ def scrape_player_data(link):
         body = table.find("tbody")
         rows = body.find_all("tr", {"class": None})
         results = results + rows
-    clean_player_data(results, day)
+    clean_player_data(results, day, 1)
 
 #for month in MONTHS:
 #    scrape_game_links(month)
@@ -351,6 +357,8 @@ pos_collection.insert_many(positional_averages)
 # The value in players is how good they are compared to average and how unique they are
 # the difference between a player and the 10th best player in that category matters to see top end potential
 # how far off the average are players? if most people are closer to average, then i guess the difference matters more. 
+# how to update the tables in MongoDB with the calculations done here
+
 
 
 
