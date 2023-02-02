@@ -198,6 +198,13 @@ if ((intDate - lastDay).days <= 0):
     average_stats = list(average_collection.find({}))
     position_stats = list(positional_collection.find({}))
 
+    # updates the eligible positions of each player
+    # param: (data) - database containing all players
+    def update_positions(data):
+        
+        for player in data:
+            print(player['name'])
+
     # checks if a metric is a rate stat, returns whether or not the rate stat has any attempts to make it valid
     # param: (item) - individual player's stats
     # param: (metric) - the stat being analyzed
@@ -247,23 +254,31 @@ if ((intDate - lastDay).days <= 0):
         stat_set[metric] = (sum / player_count)
         positional_collection.replace_one({'_id': stat_set['_id']}, stat_set)
 
+    # updates the relative value of each player 
+    def update_player_value(data):
+        for datum in data:
+            if (datum['season_averages']['games'] > 0):
+                for i in range(0, len(filters)):
+                    datum['value'][i]['fg_pct'] = datum['season_averages']['fg_pct'] - position_stats[i]['fg_pct']
+                    print(datum['value'][i]['fg_pct'])
+
+
     # need to update these two items, not create them fresh
+    #for stat_set in average_stats:
+    #    for metric in metrics:
+    #        average_data(stat_set, metric)
 
+    #for stat_set in position_stats:
+    #    for metric in metrics:
+    #        positional_averaging(stat_set, metric) 
 
-    for stat_set in average_stats:
-        for metric in metrics:
-            average_data(stat_set, metric)
-
-    for stat_set in position_stats:
-        for metric in metrics:
-            positional_averaging(stat_set, metric)  
-    
+    update_player_value(complete_data) 
     
 
     # update valid positions
-    # how to append this data to the right place in mongoDB
+    # how to append this data to the right place in mongoDB - DONE
     # how to hide api keys and still be able to publish website
     # might be better to do player averages here to see who the top 200, top 120, etc. are
 
-    # every 12th person gets duplicated, maybe could have a variable and if variable % 13 == 0, then don't add to data
+    # every 12th person gets duplicated, maybe could have a variable and if variable % 13 == 0, then don't add to data - nothing to do with this, but solved!
     # how to actually do averages. this current method won't work past the first use. need to consistently monitor the amount of games we are dividing by.
