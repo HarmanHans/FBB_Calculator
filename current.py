@@ -16,6 +16,12 @@ positions = ["PG", "SG", "SF", "PF", "C"]
 metrics = ['fg_pct', 'ft_pct', 'fg3', 'pts', 'reb', 'ast', 'st', 'blk', 'to']
 player_averages = []
 positional_averages = []
+st_dev_players = []
+st_dev_positions = []
+mean_players = []
+mean_positions = []
+median_players = []
+median_positions = []
 links = []
 all_data = {}
 data = []
@@ -46,9 +52,19 @@ def create_average_set(qualifier, list):
         average_stats['turnovers'] = 0
 
         average_stats['attempts'] = 0
+        average_stats['ft_attempts'] = 0
         list.append(average_stats) 
 
 create_average_set(filters, player_averages)
+create_average_set(filters, st_dev_players)
+create_average_set(filters, mean_players)
+create_average_set(filters, median_players)
+
+create_average_set(positions, st_dev_positions)
+create_average_set(positions, mean_positions)
+create_average_set(positions, median_positions)
+
+
 for i in range(1, len(filters)):
     create_average_set(positions, positional_averages)
 
@@ -110,6 +126,14 @@ def click_element(browser, xpath):
     element.click()
     time.sleep(5)
 
+# replaces games key in player value dictionaries to an overall value key
+# param: (dictionary) - the specific dictionary we're making the change in
+# param: (location) - the location in the dictionary where the change is applied
+def replace_key(dictionary, location):
+    for dict in dictionary[location]:
+        del dict['games']
+        dict['value'] = 0
+
 # creates initial player profile with name and position
 def get_player_position():
     url = "https://hashtagbasketball.com/fantasy-basketball-rankings"
@@ -167,11 +191,14 @@ def get_player_position():
                 profile['name'] = name
                 profile['pos'] = posEligibility
                 profile['games'] = []
-                profile['value'] = []
-                profile['positional_value'] = []
+                profile['z-value'] = []
+                profile['z-positional_value'] = []
                 profile['season_averages'] = season_averages
-                create_average_set(filters, profile['value'])
-                create_average_set(filters, profile['positional_value'])
+                create_average_set(filters, profile['z-value'])
+                create_average_set(filters, profile['z-positional_value'])
+                replace_key(profile, 'z-value')
+                replace_key(profile, 'z-positional_value')
+
                 data.append(profile)
 
 # converts the date a game took place to how many days it was from tipoff day
@@ -338,17 +365,33 @@ def scrape_player_data(link):
 #    scrape_player_data(link)
 
 # Testing:
-get_player_position()
-scrape_player_data("https://www.basketball-reference.com/boxscores/202210270SAC.html")
-scrape_player_data("https://www.basketball-reference.com/boxscores/202212230PHO.html")
-scrape_player_data("https://www.basketball-reference.com/boxscores/202301130DET.html")
+#get_player_position()
+#scrape_player_data("https://www.basketball-reference.com/boxscores/202210270SAC.html")
+#scrape_player_data("https://www.basketball-reference.com/boxscores/202212230PHO.html")
+#scrape_player_data("https://www.basketball-reference.com/boxscores/202301130DET.html")
 db = cluster["basketball-data"]
-collection = db["stats"]
-average_collection = db["player-averages"]
-pos_collection = db["positional-averages"]
-collection.insert_many(data)
-average_collection.insert_many(player_averages)
-pos_collection.insert_many(positional_averages)
+
+#collection = db["stats"]
+#average_collection = db["player-averages"]
+#pos_collection = db["positional-averages"]
+st_dev_players_collection = db["st_dev_players"]
+mean_players_collection = db["mean_players"]
+median_players_collection = db["median_players"]
+st_dev_positions_collection = db["st_dev_positions"]
+mean_positions_collection = db["mean_positions"]
+median_positions_collections = db["median_positions"]
+
+#collection.insert_many(data)
+#average_collection.insert_many(player_averages)
+#pos_collection.insert_many(positional_averages)
+st_dev_players_collection.insert_many(st_dev_players)
+mean_players_collection.insert_many(mean_players)
+median_players_collection.insert_many(median_players)
+st_dev_positions_collection.insert_many(st_dev_positions)
+mean_positions_collection.insert_many(mean_positions)
+median_positions_collections.insert_many(median_positions)
+
+
 
 
 

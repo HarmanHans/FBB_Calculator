@@ -15,7 +15,7 @@ data = []
 # number of players to sort by in table
 filters = [50, 100, 120, 150, 200, 300, 1000]
 
-metrics = ['fg_pct', 'ft_pct', 'fg3', 'pts', 'reb', 'ast', 'stl', 'blk', 'turnovers']
+metrics = ['fg_pct', 'ft_pct', 'fg3', 'pts', 'reb', 'ast', 'stl', 'blk', 'turnovers', 'attempts', 'ft_attempts']
 
 load_dotenv()
 
@@ -255,12 +255,13 @@ if ((intDate - lastDay).days <= 0):
         positional_collection.replace_one({'_id': stat_set['_id']}, stat_set)
 
     # updates the relative value of each player 
-    def update_player_value(data):
-        for datum in data:
-            if (datum['season_averages']['games'] > 0):
-                for i in range(0, len(filters)):
-                    datum['value'][i]['fg_pct'] = datum['season_averages']['fg_pct'] - position_stats[i]['fg_pct']
-                    print(datum['value'][i]['fg_pct'])
+    def update_player_value():
+        for i in range(0, len(filters)):
+            value = datum['season_averages'][metric] - average_stats[i][metric]
+            if (metric == "turnovers"):
+                value = -value
+            value = value / average_stats[i][metric]
+            datum['value'][i][metric]
 
 
     # need to update these two items, not create them fresh
@@ -272,6 +273,9 @@ if ((intDate - lastDay).days <= 0):
     #    for metric in metrics:
     #        positional_averaging(stat_set, metric) 
 
+    for datum in complete_data:
+        for metric in metrics:
+            update_player_value()
     update_player_value(complete_data) 
     
 
@@ -281,4 +285,4 @@ if ((intDate - lastDay).days <= 0):
     # might be better to do player averages here to see who the top 200, top 120, etc. are
 
     # every 12th person gets duplicated, maybe could have a variable and if variable % 13 == 0, then don't add to data - nothing to do with this, but solved!
-    # how to actually do averages. this current method won't work past the first use. need to consistently monitor the amount of games we are dividing by.
+    # calculate standard deviations for each metric and store them somewhere
