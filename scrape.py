@@ -274,8 +274,9 @@ if ((intDate - lastDay).days <= 0):
         for dev_set in st_dev_positions:
             limit = dev_set['filter']
             for stat_set in position_stats:
-                if (limit == stat_set['filter']):
+                if (limit == stat_set['filter'] and limit < 301):
                     pos = stat_set['key']
+                    print(pos)
                     for metric in stat_set:
                         player_count = 0
                         square_of_differences = 0.0
@@ -293,6 +294,7 @@ if ((intDate - lastDay).days <= 0):
             #print(dev_set)
             st_dev_positions_collection.replace_one({'_id': dev_set['_id']}, dev_set)
     
+    # does not work!
     def update_positional_z_score():
         for item in complete_data:
             if(item['season_averages']['games'] > 0):
@@ -311,14 +313,11 @@ if ((intDate - lastDay).days <= 0):
                                     if (key != '_id' and key != 'key' and key != 'games' and key != 'filter'):
                                         comp[key] = item['season_averages'][key] - mean_set[key]    
                     for dev_set in st_dev_positions:
-                        if(dev_set['key'] == comp['pos']):
+                        if(dev_set['key'] == comp['pos'] and dev_set['filter'] < 301):
                             for key in dev_set:
                                 if (key != '_id' and key != 'key' and key != 'games' and key != 'filter'):
-                                    print(dev_set[key])
-                                    print(dev_set['key'])
-                                    print(key)
                                     comp[key] = comp[key] / dev_set[key]
-                                    if (key != '_id' and key != 'key' and key != 'games' and key != 'attempts' and key != 'ft_attempts'):
+                                    if (key != 'attempts' and key != 'ft_attempts'):
                                         value += comp[key]
                     #item['pos'][index]
                     comp['value'] = value / CATEGORIES
