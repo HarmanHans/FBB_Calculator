@@ -4,6 +4,7 @@ from selenium import webdriver
 import time
 from datetime import date 
 from datetime import timedelta
+import statistics
 import json
 import pymongo
 from pymongo import MongoClient
@@ -16,6 +17,7 @@ data = []
 filters = [50, 100, 120, 150, 200, 300, 1000]
 
 metrics = ['fg_pct', 'ft_pct', 'fg3', 'pts', 'reb', 'ast', 'stl', 'blk', 'turnovers', 'attempts', 'ft_attempts']
+CATEGORIES = 9
 
 load_dotenv()
 
@@ -194,9 +196,22 @@ if ((intDate - lastDay).days <= 0):
     collection = db["stats"]
     average_collection = db["player-averages"]
     positional_collection = db["positional-averages"]
+    st_dev_players_collection = db["st_dev_players"]
+    mean_players_collection = db["mean_players"]
+    median_players_collection = db["median_players"]
+    st_dev_positions_collection = db["st_dev_positions"]
+    mean_positions_collection = db["mean_positions"]
+    median_positions_collection = db["median_positions"]
+
     complete_data = list(collection.find({}))
     average_stats = list(average_collection.find({}))
     position_stats = list(positional_collection.find({}))
+    st_dev_players = list(st_dev_players_collection.find({}))
+    mean_players = list(mean_players_collection.find({}))
+    median_players = list(median_players_collection.find({}))
+    st_dev_positions = list(st_dev_positions_collection.find({}))
+    mean_positions = list(mean_positions_collection.find({}))
+    median_positions = list(median_positions_collection.find({}))
 
     # updates the eligible positions of each player
     # param: (data) - database containing all players
@@ -208,10 +223,10 @@ if ((intDate - lastDay).days <= 0):
     # checks if a metric is a rate stat, returns whether or not the rate stat has any attempts to make it valid
     # param: (item) - individual player's stats
     # param: (metric) - the stat being analyzed
-    def is_rate_stat(item, metric):
+    def is_empty_rate_stat(item, metric):
         if (metric == 'fg_pct'):
-                if (item['season_averages']['attempts'] == 0):
-                    return True
+            if (item['season_averages']['attempts'] == 0):
+                return True
         if (metric == 'ft_pct'):
             if (item['season_averages']['ft_attempts'] == 0):
                 return True
@@ -220,14 +235,14 @@ if ((intDate - lastDay).days <= 0):
     # finds the average of a given metric based on how many players are compared
     # param: (stat_set) - Dictionary. dictionary containing averages of top X players.
     # param: (metric) - String. represents metric that we are comparing.
-    def average_data(stat_set, metric):
+    def mean_data(stat_set, metric):
         limit = stat_set['key']
         sorted_list = sorted(complete_data, key=lambda i : i['season_averages'][metric], reverse=True)
         sum = 0
         player_count = 0
 
         for item in sorted_list:
-            if(is_rate_stat(item, metric)):
+            if(is_empty_rate_stat(item, metric)):
                 continue
             if (item['season_averages']['games'] > 0 and player_count < limit):
                 player_count += 1
@@ -239,13 +254,13 @@ if ((intDate - lastDay).days <= 0):
     # finds the average stats by position
     # param: (stat_set) - Dictionary. dictionary containing the stats of players.
     # param: (metric) - String. represents metric that we are comparing.
-    def positional_averaging(stat_set, metric):
+    def positional_mean(stat_set, metric):
         limit = stat_set['filter']
         sorted_list = sorted(complete_data, key=lambda i : i['season_averages'][metric], reverse=True)
         sum = 0
         player_count = 0
         for item in sorted_list:
-            if(is_rate_stat(item, metric)):
+            if(is_empty_rate_stat(item, metric)):
                 continue
             if (stat_set['key'] in item['pos'] and item['season_averages']['games'] > 0 and player_count < limit):
                 player_count += 1
@@ -253,32 +268,146 @@ if ((intDate - lastDay).days <= 0):
         stat_set['games'] = player_count
         stat_set[metric] = (sum / player_count)
         positional_collection.replace_one({'_id': stat_set['_id']}, stat_set)
-
-    # updates the relative value of each player 
-    def update_player_value():
-        for i in range(0, len(filters)):
-            value = datum['season_averages'][metric] - average_stats[i][metric]
-            if (metric == "turnovers"):
-                value = -value
-            value = value / average_stats[i][metric]
-            datum['value'][i][metric]
-
-
-    # need to update these two items, not create them fresh
-    #for stat_set in average_stats:
-    #    for metric in metrics:
-    #        average_data(stat_set, metric)
-
-    #for stat_set in position_stats:
-    #    for metric in metrics:
-    #        positional_averaging(stat_set, metric) 
-
-    for datum in complete_data:
-        for metric in metrics:
-            update_player_value()
-    update_player_value(complete_data) 
     
+    # calculates and stores the standard deviation of each category by position
+    def update_positional_st_dev():
+        for dev_set in st_dev_positions:
+            limit = dev_set['filter']
+            for stat_set in position_stats:
+                if (limit == stat_set['filter']):
+                    pos = stat_set['key']
+                    for metric in stat_set:
+                        player_count = 0
+                        square_of_differences = 0.0
+                        st_dev = 0.0
+                        if(metric != '_id' and metric != 'key' and metric != 'filter' and metric != 'games'):
+                            sorted_list = sorted(complete_data, key=lambda i : i['season_averages'][metric], reverse=True)
+                            for item in sorted_list:
+                                if(is_empty_rate_stat(item, metric)):
+                                    continue
+                                if (pos in item['pos'] and item['season_averages']['games'] > 0 and player_count < limit):
+                                    player_count += 1
+                                    square_of_differences += (item['season_averages'][metric] - stat_set[metric]) ** 2
+                            st_dev = (square_of_differences / (player_count - 1)) ** 0.5
+                            dev_set[metric] = st_dev
+            #print(dev_set)
+            st_dev_positions_collection.replace_one({'_id': dev_set['_id']}, dev_set)
+    
+    def update_positional_z_score():
+        for item in complete_data:
+            if(item['season_averages']['games'] > 0):
+                count = 1
+                index = 0
+                for comp in item['z-positional_value']:
+                    value = 0
+                    if (count % 8 == 0):
+                        index += 1
+                    #pos = item['pos'][index]
+                    comp['pos'] = "PG"
+                    for mean_set in position_stats:
+                        if (mean_set['key'] == comp['pos']):
+                            if (mean_set['filter'] == comp['key']):
+                                for key in mean_set:
+                                    if (key != '_id' and key != 'key' and key != 'games' and key != 'filter'):
+                                        comp[key] = item['season_averages'][key] - mean_set[key]    
+                    for dev_set in st_dev_positions:
+                        if(dev_set['key'] == comp['pos']):
+                            for key in dev_set:
+                                if (key != '_id' and key != 'key' and key != 'games' and key != 'filter'):
+                                    print(dev_set[key])
+                                    print(dev_set['key'])
+                                    print(key)
+                                    comp[key] = comp[key] / dev_set[key]
+                                    if (key != '_id' and key != 'key' and key != 'games' and key != 'attempts' and key != 'ft_attempts'):
+                                        value += comp[key]
+                    #item['pos'][index]
+                    comp['value'] = value / CATEGORIES
+                    count += 1
+            collection.replace_one({'_id': item['_id']}, item)
 
+    # calculates and stores the median of each category
+    def update_median_players():
+        player_count = 0
+        median = 0
+        store_value = []
+        for set in median_players:
+            limit = set['key']
+            for key in set:
+                if (key != '_id' and key != 'key'):
+                    sorted_list = sorted(complete_data, key=lambda i : i['season_averages'][key], reverse=True)
+                    for item in sorted_list:
+                        if(is_empty_rate_stat(item, key)):
+                            continue
+                        if (item['season_averages']['games'] > 0 and player_count < limit):
+                            player_count += 1
+                            store_value.append(item['season_averages'][key])
+                        elif (player_count >= limit):
+                            break
+                    median = statistics.median(store_value)
+                    set[key] = median
+                median = 0
+                store_value = []
+                player_count = 0
+            median_players_collection.replace_one({'_id': set['_id']}, set)
+
+    # calculates and stores the standard deviation of each category
+    def update_st_dev_players():
+        for set in st_dev_players:
+            limit = set['key']
+            for mean_set in average_stats:
+                if (limit == mean_set['key']):
+                    for key in mean_set:
+                        player_count = 0
+                        square_of_differences = 0.0
+                        st_dev = 0.0
+                        if (key != '_id' and key != 'key' and key != 'games'):
+                            sorted_list = sorted(complete_data, key=lambda i : i['season_averages'][key], reverse=True)
+                            for item in sorted_list:
+                                if(is_empty_rate_stat(item, key)):
+                                    continue
+                                if (item['season_averages']['games'] > 0 and player_count < limit):
+                                    player_count += 1
+                                    square_of_differences += (item['season_averages'][key] - mean_set[key]) ** 2
+                            st_dev = (square_of_differences / (player_count - 1)) ** 0.5
+                            set[key] = st_dev
+            st_dev_players_collection.replace_one({'_id': set['_id']}, set)
+
+    # updates the z_scores for each category of each player
+    def update_z_score_players():
+        for item in complete_data:
+            if(item['season_averages']['games'] > 0):
+                for comp in item['z-value']:
+                    value = 0
+                    for mean_set in average_stats:
+                        if(mean_set['key'] == comp['key']):
+                            for key in mean_set:
+                                if (key != '_id' and key != 'key' and key != 'games'):
+                                    comp[key] = item['season_averages'][key] - mean_set[key] 
+                    for dev_set in st_dev_players:
+                        if(dev_set['key'] == comp['key']):
+                            for key in dev_set:
+                                if (key != '_id' and key != 'key' and key != 'games'):
+                                    comp[key] = comp[key] / dev_set[key]
+                                    if (key != '_id' and key != 'key' and key != 'games' and key != 'attempts' and key != 'ft_attempts'):
+                                        value += comp[key]
+                    comp['value'] = value / CATEGORIES
+            collection.replace_one({'_id': item['_id']}, item)
+
+    for stat_set in average_stats:
+        for metric in metrics:
+            mean_data(stat_set, metric)
+
+    for stat_set in position_stats:
+        for metric in metrics:
+            positional_mean(stat_set, metric) 
+
+    #print(average_stats)
+    #update_st_dev_players()
+    #update_z_score_players()
+    #update_median_players()
+    update_positional_st_dev()
+    #update_positional_z_score()
+    
     # update valid positions
     # how to append this data to the right place in mongoDB - DONE
     # how to hide api keys and still be able to publish website

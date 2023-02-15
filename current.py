@@ -18,8 +18,6 @@ player_averages = []
 positional_averages = []
 st_dev_players = []
 st_dev_positions = []
-mean_players = []
-mean_positions = []
 median_players = []
 median_positions = []
 links = []
@@ -57,28 +55,36 @@ def create_average_set(qualifier, list):
 
 create_average_set(filters, player_averages)
 create_average_set(filters, st_dev_players)
-create_average_set(filters, mean_players)
 create_average_set(filters, median_players)
 
 create_average_set(positions, st_dev_positions)
-create_average_set(positions, mean_positions)
 create_average_set(positions, median_positions)
 
 
 for i in range(1, len(filters)):
     create_average_set(positions, positional_averages)
 
-def filterize_positional_averages():
+for i in range(1, len(filters)):
+    create_average_set(positions, st_dev_positions)
+
+for i in range(1, len(filters)):
+    create_average_set(positions, median_positions)
+
+# adds filters to each doc in a dataset
+# param: (list) - the dataset we're appending filters to
+def filterize_dataset(list, repetitions):
     count = 1
     index = 0
-    for dict in positional_averages:
+    for dict in list:
         dict['filter'] = filters[index]
-        if (count == 5):
+        if (count == repetitions):
             count = 0
             index += 1
         count += 1
 
-filterize_positional_averages()
+filterize_dataset(positional_averages, 5)
+filterize_dataset(st_dev_positions, 5)
+filterize_dataset(median_positions, 5)
 
 # access database
 load_dotenv()
@@ -195,7 +201,8 @@ def get_player_position():
                 profile['z-positional_value'] = []
                 profile['season_averages'] = season_averages
                 create_average_set(filters, profile['z-value'])
-                create_average_set(filters, profile['z-positional_value'])
+                for i in range(0, len(profile['pos'])):
+                    create_average_set(filters, profile['z-positional_value'])
                 replace_key(profile, 'z-value')
                 replace_key(profile, 'z-positional_value')
 
@@ -228,15 +235,15 @@ def append_data(datum, name):
                 dict['season_averages']['fg'] = (dict['season_averages']['fg'] + datum['fg']) / games
                 dict['season_averages']['attempts'] = (dict['season_averages']['attempts'] + datum['attempts']) / games
                 if (datum['fg'] > 0):
-                    dict['season_averages']['fg_pct'] = round((dict['season_averages']['fg_pct'] + (datum['fg'] / datum['attempts'])), 4)
+                    dict['season_averages']['fg_pct'] = round((dict['season_averages']['fg'] / dict['season_averages']['attempts']), 4)
                 dict['season_averages']['fg3'] = (dict['season_averages']['fg3'] + datum['fg3']) / games
                 dict['season_averages']['fg3_attempts'] = (dict['season_averages']['fg3_attempts'] + datum['fg3_attempts']) / games
                 if (datum['fg3_attempts'] > 0):
-                    dict['season_averages']['fg3_pct'] = round((dict['season_averages']['fg3_pct'] + (datum['fg3'] / datum['fg3_attempts'])), 4)
+                    dict['season_averages']['fg3_pct'] = round((dict['season_averages']['fg3'] / dict['season_averages']['fg3_attempts']), 4)
                 dict['season_averages']['ft'] = (dict['season_averages']['ft'] + datum['ft']) / games
                 dict['season_averages']['ft_attempts'] = (dict['season_averages']['ft_attempts'] + datum['ft_attempts']) / games
                 if (datum['ft_attempts'] > 0):
-                    dict['season_averages']['ft_pct'] = round((dict['season_averages']['ft_pct'] + (datum['ft'] / datum['ft_attempts'])), 4)
+                    dict['season_averages']['ft_pct'] = round((dict['season_averages']['ft'] / dict['season_averages']['ft_attempts']), 4)
                 dict['season_averages']['orb'] = (dict['season_averages']['orb'] + datum['orb']) / games
                 dict['season_averages']['drb'] = (dict['season_averages']['drb'] + datum['drb']) / games
                 dict['season_averages']['reb'] = (dict['season_averages']['reb'] + datum['reb']) / games
@@ -365,31 +372,27 @@ def scrape_player_data(link):
 #    scrape_player_data(link)
 
 # Testing:
-#get_player_position()
-#scrape_player_data("https://www.basketball-reference.com/boxscores/202210270SAC.html")
-#scrape_player_data("https://www.basketball-reference.com/boxscores/202212230PHO.html")
-#scrape_player_data("https://www.basketball-reference.com/boxscores/202301130DET.html")
+get_player_position()
+scrape_player_data("https://www.basketball-reference.com/boxscores/202210270SAC.html")
+scrape_player_data("https://www.basketball-reference.com/boxscores/202212230PHO.html")
+scrape_player_data("https://www.basketball-reference.com/boxscores/202301130DET.html")
 db = cluster["basketball-data"]
 
-#collection = db["stats"]
-#average_collection = db["player-averages"]
-#pos_collection = db["positional-averages"]
+collection = db["stats"]
+average_collection = db["player-averages"]
+pos_collection = db["positional-averages"]
 st_dev_players_collection = db["st_dev_players"]
-mean_players_collection = db["mean_players"]
 median_players_collection = db["median_players"]
 st_dev_positions_collection = db["st_dev_positions"]
-mean_positions_collection = db["mean_positions"]
-median_positions_collections = db["median_positions"]
+median_positions_collection = db["median_positions"]
 
-#collection.insert_many(data)
-#average_collection.insert_many(player_averages)
-#pos_collection.insert_many(positional_averages)
+collection.insert_many(data)
+average_collection.insert_many(player_averages)
+pos_collection.insert_many(positional_averages)
 st_dev_players_collection.insert_many(st_dev_players)
-mean_players_collection.insert_many(mean_players)
 median_players_collection.insert_many(median_players)
 st_dev_positions_collection.insert_many(st_dev_positions)
-mean_positions_collection.insert_many(mean_positions)
-median_positions_collections.insert_many(median_positions)
+median_positions_collection.insert_many(median_positions)
 
 
 
