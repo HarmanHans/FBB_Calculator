@@ -275,8 +275,10 @@ if ((intDate - lastDay).days <= 0):
             limit = dev_set['filter']
             for stat_set in position_stats:
                 if (limit == stat_set['filter'] and limit < 301):
+                    curr = dev_set['key']
                     pos = stat_set['key']
-                    print(pos)
+                    if (curr != pos):
+                        continue
                     for metric in stat_set:
                         player_count = 0
                         square_of_differences = 0.0
@@ -291,10 +293,10 @@ if ((intDate - lastDay).days <= 0):
                                     square_of_differences += (item['season_averages'][metric] - stat_set[metric]) ** 2
                             st_dev = (square_of_differences / (player_count - 1)) ** 0.5
                             dev_set[metric] = st_dev
-            #print(dev_set)
             st_dev_positions_collection.replace_one({'_id': dev_set['_id']}, dev_set)
     
-    # does not work!
+    # updates the z score of each player comparing only to others who play their position
+    # some stats are really out there: percentages, blk, stl 
     def update_positional_z_score():
         for item in complete_data:
             if(item['season_averages']['games'] > 0):
@@ -304,22 +306,24 @@ if ((intDate - lastDay).days <= 0):
                     value = 0
                     if (count % 8 == 0):
                         index += 1
-                    #pos = item['pos'][index]
-                    comp['pos'] = "PG"
+                    pos = item['pos'][index]
+                    comp['pos'] = pos
                     for mean_set in position_stats:
-                        if (mean_set['key'] == comp['pos']):
+                        if (mean_set['key'] == comp['pos'] and mean_set['filter'] == comp['key']):
                             if (mean_set['filter'] == comp['key']):
                                 for key in mean_set:
                                     if (key != '_id' and key != 'key' and key != 'games' and key != 'filter'):
-                                        comp[key] = item['season_averages'][key] - mean_set[key]    
+                                        comp[key] = item['season_averages'][key] - mean_set[key]
                     for dev_set in st_dev_positions:
-                        if(dev_set['key'] == comp['pos'] and dev_set['filter'] < 301):
-                            for key in dev_set:
+                        if(dev_set['key'] == comp['pos'] and dev_set['filter'] < 301 and dev_set['filter'] == comp['key']):
+                            for key in dev_set:   
                                 if (key != '_id' and key != 'key' and key != 'games' and key != 'filter'):
-                                    comp[key] = comp[key] / dev_set[key]
+                                    if (is_empty_rate_stat(item, key)):
+                                        comp[key] = 0
+                                    else:
+                                        comp[key] = comp[key] / dev_set[key]
                                     if (key != 'attempts' and key != 'ft_attempts'):
                                         value += comp[key]
-                    #item['pos'][index]
                     comp['value'] = value / CATEGORIES
                     count += 1
             collection.replace_one({'_id': item['_id']}, item)
@@ -404,8 +408,8 @@ if ((intDate - lastDay).days <= 0):
     #update_st_dev_players()
     #update_z_score_players()
     #update_median_players()
-    update_positional_st_dev()
-    #update_positional_z_score()
+    #update_positional_st_dev()
+    update_positional_z_score()
     
     # update valid positions
     # how to append this data to the right place in mongoDB - DONE
