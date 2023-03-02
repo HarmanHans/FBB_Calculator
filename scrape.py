@@ -18,6 +18,8 @@ filters = [50, 100, 120, 150, 200, 300, 1000]
 
 metrics = ['fg_pct', 'ft_pct', 'fg3', 'pts', 'reb', 'ast', 'stl', 'blk', 'turnovers', 'attempts', 'ft_attempts']
 CATEGORIES = 9
+# inverse weight on attempts for 'other stats' metrics
+SCALER = 3
 
 load_dotenv()
 
@@ -400,7 +402,33 @@ if ((intDate - lastDay).days <= 0):
     def update_other_stats():
         for item in complete_data:
             if (item['season_averages']['games'] > 0):
-                print()
+                for comp in item['other-stats']:
+                    pts_scaler = 0
+                    ft_scaler = 0
+                    for z_set in item['z-value']:
+                        if (comp['key'] == z_set['key']):
+                            if (item['season_averages']['attempts'] > 0):
+                                pts_scaler = 1 + (z_set['attempts'] / SCALER)
+                                pts_scaler = pts_scaler * z_set['fg_pct']
+                                comp['pts-value'] = pts_scaler
+                            if (item['season_averages']['ft_attempts'] > 0):
+                                ft_scaler = 1 + (z_set['ft_attempts'] / SCALER)
+                                ft_scaler = ft_scaler * z_set['ft_pct']
+                                comp['ft-value'] = ft_scaler
+            collection.replace_one({'_id': item['_id']}, item)
+
+    # creates valuation of volume and efficiency of player scoring and free throws relative to position
+    def update_other_stats_pos():
+        for item in complete_data:
+            if (item['season_averages']['games'] > 0):
+                count = 1
+                index = 0
+                for comp in item['other-stats-pos']:
+                    if (count % 8 == 0):
+                        index += 1
+                    pos = item['pos'][index]
+                    comp['pos'] = pos
+            collection.replace_one({'_id': item['_id']}, item)
 
 
     for stat_set in average_stats:
@@ -412,12 +440,13 @@ if ((intDate - lastDay).days <= 0):
             positional_mean(stat_set, metric) 
 
     #print(average_stats)
-    update_st_dev_players()
-    update_z_score_players()
-    update_median_players()
-    update_positional_st_dev()
-    update_positional_z_score()
+    #update_st_dev_players()
+    #update_z_score_players()
+    #update_median_players()
+    #update_positional_st_dev()
+    #update_positional_z_score()
     #update_other_stats()
+    update_other_stats_pos()
     
     # update valid positions
     # how to append this data to the right place in mongoDB - DONE
