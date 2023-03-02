@@ -396,6 +396,13 @@ if ((intDate - lastDay).days <= 0):
                     comp['value'] = value / CATEGORIES
             collection.replace_one({'_id': item['_id']}, item)
 
+    # creates valuation of volume and efficiency of player scoring and free throws
+    def update_other_stats():
+        for item in complete_data:
+            if (item['season_averages']['games'] > 0):
+                print()
+
+
     for stat_set in average_stats:
         for metric in metrics:
             mean_data(stat_set, metric)
@@ -405,11 +412,12 @@ if ((intDate - lastDay).days <= 0):
             positional_mean(stat_set, metric) 
 
     #print(average_stats)
-    #update_st_dev_players()
-    #update_z_score_players()
-    #update_median_players()
-    #update_positional_st_dev()
+    update_st_dev_players()
+    update_z_score_players()
+    update_median_players()
+    update_positional_st_dev()
     update_positional_z_score()
+    #update_other_stats()
     
     # update valid positions
     # how to append this data to the right place in mongoDB - DONE

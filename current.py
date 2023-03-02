@@ -60,6 +60,17 @@ create_average_set(filters, median_players)
 create_average_set(positions, st_dev_positions)
 create_average_set(positions, median_positions)
 
+# creates data set to see value of volume + efficiency compared to other players
+# param: (qualifier) - whether this average set is sorted by position or top X players.
+# param: (list) - the specific list we are storing this data in
+def create_other_stats(qualifier, list):
+    for i in qualifier:
+        other_stats = {}
+
+        other_stats['key'] = i
+        other_stats['pts-value'] = -1
+        other_stats['ft-value'] = -1
+        list.append(other_stats)
 
 for i in range(1, len(filters)):
     create_average_set(positions, positional_averages)
@@ -200,12 +211,16 @@ def get_player_position():
                 profile['z-value'] = []
                 profile['z-positional_value'] = []
                 profile['season_averages'] = season_averages
+                profile['other-stats'] = []
+                profile['other-stats-pos'] = []
                 create_average_set(filters, profile['z-value'])
+                create_other_stats(filters, profile['other-stats'])
                 for i in range(0, len(profile['pos'])):
                     create_average_set(filters, profile['z-positional_value'])
+                for i in range(0, len(profile['pos'])):
+                    create_other_stats(filters, profile['other-stats-pos'])
                 replace_key(profile, 'z-value')
                 replace_key(profile, 'z-positional_value')
-
                 data.append(profile)
 
 # converts the date a game took place to how many days it was from tipoff day
