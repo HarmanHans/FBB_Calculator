@@ -215,13 +215,6 @@ if ((intDate - lastDay).days <= 0):
     mean_positions = list(mean_positions_collection.find({}))
     median_positions = list(median_positions_collection.find({}))
 
-    # updates the eligible positions of each player
-    # param: (data) - database containing all players
-    def update_positions(data):
-        
-        for player in data:
-            print(player['name'])
-
     # checks if a metric is a rate stat, returns whether or not the rate stat has any attempts to make it valid
     # param: (item) - individual player's stats
     # param: (metric) - the stat being analyzed
