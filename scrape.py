@@ -428,6 +428,19 @@ if ((intDate - lastDay).days <= 0):
                         index += 1
                     pos = item['pos'][index]
                     comp['pos'] = pos
+                    pts_scaler = 0
+                    ft_scaler = 0
+                    for z_set in item['z-positional_value']:
+                        if (comp['key'] == z_set['key']):
+                            if (item['season_averages']['attempts'] > 0):
+                                pts_scaler = 1 + (z_set['attempts'] / SCALER)
+                                pts_scaler = pts_scaler * z_set['fg_pct']
+                                comp['pts-value'] = pts_scaler
+                            if (item['season_averages']['ft_attempts'] > 0):
+                                ft_scaler = 1 + (z_set['ft_attempts'] / SCALER)
+                                ft_scaler = ft_scaler * z_set['ft_pct']
+                                comp['ft-value'] = ft_scaler
+                    count += 1
             collection.replace_one({'_id': item['_id']}, item)
 
 
