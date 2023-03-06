@@ -222,9 +222,10 @@ if ((intDate - lastDay).days <= 0):
             results = results + rows
         clean_player_data(results)
 
-    # replace with github secret later probably
-    username = os.getenv("USERNAME_MONGO")
-    password = os.getenv("PASSWORD_MONGO")
+    #username = os.getenv("USERNAME_MONGO")
+    #password = os.getenv("PASSWORD_MONGO")
+    username = os.environ["USERNAME_MDB"]
+    password = os.environ["PASSWORD_MDB"]
     cluster = pymongo.MongoClient(f"mongodb+srv://{username}:{password}@nodecluster.gknsvxa.mongodb.net/?retryWrites=true&w=majority")
     db = cluster["basketball-data"]
     collection = db["stats"]
