@@ -10,7 +10,7 @@ import chromedriver_autoinstaller as chromedriver
 
 chromedriver.install()
 
-MONTHS = ["october", "november", "december", "january", "february"]
+MONTHS = ["october", "november", "december", "january", "february", "march"]
 filters = [50, 100, 120, 150, 200, 300, 1000]
 positions = ["PG", "SG", "SF", "PF", "C"]
 metrics = ['fg_pct', 'ft_pct', 'fg3', 'pts', 'reb', 'ast', 'st', 'blk', 'to']
@@ -211,6 +211,7 @@ def get_player_position():
                 profile['z-value'] = []
                 profile['z-positional_value'] = []
                 profile['season_averages'] = season_averages
+                profile['projections'] = season_averages
                 profile['other-stats'] = []
                 profile['other-stats-pos'] = []
                 create_average_set(filters, profile['z-value'])
@@ -381,16 +382,16 @@ def scrape_player_data(link):
         results = results + rows
     clean_player_data(results, day)
 
-#for month in MONTHS:
-#    scrape_game_links(month)
-#for link in links:
-#    scrape_player_data(link)
+for month in MONTHS:
+    scrape_game_links(month)
+for link in links:
+    scrape_player_data(link)
 
-# Testing:
 get_player_position()
-scrape_player_data("https://www.basketball-reference.com/boxscores/202210270SAC.html")
-scrape_player_data("https://www.basketball-reference.com/boxscores/202212230PHO.html")
-scrape_player_data("https://www.basketball-reference.com/boxscores/202301130DET.html")
+# testing scraping below
+#scrape_player_data("https://www.basketball-reference.com/boxscores/202210270SAC.html")
+#scrape_player_data("https://www.basketball-reference.com/boxscores/202212230PHO.html")
+#scrape_player_data("https://www.basketball-reference.com/boxscores/202301130DET.html")
 db = cluster["basketball-data"]
 
 collection = db["stats"]

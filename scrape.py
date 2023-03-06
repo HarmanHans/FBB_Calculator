@@ -9,6 +9,9 @@ import json
 import pymongo
 from pymongo import MongoClient
 from dotenv import load_dotenv
+import chromedriver_autoinstaller as chromedriver
+
+chromedriver.install()
 
 # needs to be until the last day of the NBA regular season
 links = []
@@ -87,6 +90,42 @@ if ((intDate - lastDay).days <= 0):
         sec_side_num = round((float(second_side) / 60), 2)
         return(min_side_num + sec_side_num)
 
+    # adds data for a particular game into entire database
+    # param: (datum) - the stats set for an entire game
+    # param: (name) - the name of the given player
+    def append_data(datum, name):
+        for dict in complete_data:
+            if (name == dict['name']):
+                dict['games'].append(datum)
+                if (datum['minutes'] > -1):
+                    dict['season_averages']['games'] = dict['season_averages']['games'] + 1
+                    games = dict['season_averages']['games']
+                    dict['season_averages']['minutes'] = round((dict['season_averages']['minutes'] + datum['minutes']) / games, 2)
+                    dict['season_averages']['fg'] = (dict['season_averages']['fg'] + datum['fg']) / games
+                    dict['season_averages']['attempts'] = (dict['season_averages']['attempts'] + datum['attempts']) / games
+                    if (datum['fg'] > 0):
+                        dict['season_averages']['fg_pct'] = round((dict['season_averages']['fg'] / dict['season_averages']['attempts']), 4)
+                    dict['season_averages']['fg3'] = (dict['season_averages']['fg3'] + datum['fg3']) / games
+                    dict['season_averages']['fg3_attempts'] = (dict['season_averages']['fg3_attempts'] + datum['fg3_attempts']) / games
+                    if (datum['fg3_attempts'] > 0):
+                        dict['season_averages']['fg3_pct'] = round((dict['season_averages']['fg3'] / dict['season_averages']['fg3_attempts']), 4)
+                    dict['season_averages']['ft'] = (dict['season_averages']['ft'] + datum['ft']) / games
+                    dict['season_averages']['ft_attempts'] = (dict['season_averages']['ft_attempts'] + datum['ft_attempts']) / games
+                    if (datum['ft_attempts'] > 0):
+                        dict['season_averages']['ft_pct'] = round((dict['season_averages']['ft'] / dict['season_averages']['ft_attempts']), 4)
+                    dict['season_averages']['orb'] = (dict['season_averages']['orb'] + datum['orb']) / games
+                    dict['season_averages']['drb'] = (dict['season_averages']['drb'] + datum['drb']) / games
+                    dict['season_averages']['reb'] = (dict['season_averages']['reb'] + datum['reb']) / games
+                    dict['season_averages']['ast'] = (dict['season_averages']['ast'] + datum['ast']) / games
+                    dict['season_averages']['stl'] = (dict['season_averages']['stl'] + datum['stl']) / games
+                    dict['season_averages']['blk'] = (dict['season_averages']['blk'] + datum['blk']) / games
+                    dict['season_averages']['turnovers'] = (dict['season_averages']['turnovers'] + datum['turnovers']) / games
+                    dict['season_averages']['fouls'] = (dict['season_averages']['fouls'] + datum['fouls']) / games
+                    dict['season_averages']['pts'] = (dict['season_averages']['pts'] + datum['pts']) / games
+                    if (datum['plus_minus'] is not None):
+                        dict['season_averages']['plus_minus'] = (dict['season_averages']['plus_minus'] + datum['plus_minus']) / games
+                collection.replace_one({'_id': dict['_id']}, dict)
+
     # given each players statline from the website, this method cleans the data 
     # and divides it into separate stats
     # param: (results) - a list of player data
@@ -163,8 +202,7 @@ if ((intDate - lastDay).days <= 0):
             datum['pts'] = pts
             datum['plus_minus'] = plus_minus
 
-            #append_data(datum, name)
-            data.append(datum)
+            append_data(datum, name)
 
     # given a box score page, scrapes stats of each player who played
     # param: (link) - A url (string form) to the box score we're extracting data from
@@ -183,12 +221,6 @@ if ((intDate - lastDay).days <= 0):
             rows = body.find_all("tr", {"class": None})
             results = results + rows
         clean_player_data(results)
-
-    #scrape_game_links()
-    #for link in links:
-    #    scrape_player_data(link)
-    #scrape_player_data("https://www.basketball-reference.com/boxscores/202301050DAL.html")
-    #print(data)
 
     # replace with github secret later probably
     username = os.getenv("USERNAME_MONGO")
@@ -214,6 +246,10 @@ if ((intDate - lastDay).days <= 0):
     st_dev_positions = list(st_dev_positions_collection.find({}))
     mean_positions = list(mean_positions_collection.find({}))
     median_positions = list(median_positions_collection.find({}))
+
+    scrape_game_links()
+    for link in links:
+        scrape_player_data(link)
 
     # checks if a metric is a rate stat, returns whether or not the rate stat has any attempts to make it valid
     # param: (item) - individual player's stats
@@ -435,8 +471,7 @@ if ((intDate - lastDay).days <= 0):
                                 comp['ft-value'] = ft_scaler
                     count += 1
             collection.replace_one({'_id': item['_id']}, item)
-
-
+    
     for stat_set in average_stats:
         for metric in metrics:
             mean_data(stat_set, metric)
@@ -445,19 +480,10 @@ if ((intDate - lastDay).days <= 0):
         for metric in metrics:
             positional_mean(stat_set, metric) 
 
-    #print(average_stats)
-    #update_st_dev_players()
-    #update_z_score_players()
-    #update_median_players()
-    #update_positional_st_dev()
-    #update_positional_z_score()
-    #update_other_stats()
+    update_st_dev_players()
+    update_z_score_players()
+    update_median_players()
+    update_positional_st_dev()
+    update_positional_z_score()
+    update_other_stats()
     update_other_stats_pos()
-    
-    # update valid positions
-    # how to append this data to the right place in mongoDB - DONE
-    # how to hide api keys and still be able to publish website
-    # might be better to do player averages here to see who the top 200, top 120, etc. are
-
-    # every 12th person gets duplicated, maybe could have a variable and if variable % 13 == 0, then don't add to data - nothing to do with this, but solved!
-    # calculate standard deviations for each metric and store them somewhere
