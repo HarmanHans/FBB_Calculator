@@ -1,0 +1,26 @@
+name: run scrape.py
+
+on:
+  schedule:
+    - cron: "0 4 * * *"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: install python packages
+              run: |
+                python -m pip install --upgrade pip
+                pip install -r requirements.txt
+
+      - name: execute py script 
+              env:
+                USERNAME_MDB: ${{ secrets.USERNAME_MDB }}
+                PASSWORD_MDB: ${{ secrets.PASSWORD_MDB }}
+              run: python scrape.py
