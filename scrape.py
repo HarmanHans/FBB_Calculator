@@ -98,32 +98,33 @@ if ((intDate - lastDay).days <= 0):
             if (name == dict['name']):
                 dict['games'].append(datum)
                 if (datum['minutes'] > -1):
+                    old_games = dict['season_averages']['games']
                     dict['season_averages']['games'] = dict['season_averages']['games'] + 1
                     games = dict['season_averages']['games']
-                    dict['season_averages']['minutes'] = round((dict['season_averages']['minutes'] + datum['minutes']) / games, 2)
-                    dict['season_averages']['fg'] = (dict['season_averages']['fg'] + datum['fg']) / games
-                    dict['season_averages']['attempts'] = (dict['season_averages']['attempts'] + datum['attempts']) / games
+                    dict['season_averages']['minutes'] = ((old_games * dict['season_averages']['minutes']) + datum['minutes']) / games
+                    dict['season_averages']['fg'] = ((old_games * dict['season_averages']['fg']) + datum['fg']) / games
+                    dict['season_averages']['attempts'] = ((old_games * dict['season_averages']['attempts']) + datum['attempts']) / games
                     if (datum['fg'] > 0):
-                        dict['season_averages']['fg_pct'] = round((dict['season_averages']['fg'] / dict['season_averages']['attempts']), 4)
-                    dict['season_averages']['fg3'] = (dict['season_averages']['fg3'] + datum['fg3']) / games
-                    dict['season_averages']['fg3_attempts'] = (dict['season_averages']['fg3_attempts'] + datum['fg3_attempts']) / games
+                        dict['season_averages']['fg_pct'] = (dict['season_averages']['fg'] / dict['season_averages']['attempts'])
+                    dict['season_averages']['fg3'] = ((old_games * dict['season_averages']['fg3']) + datum['fg3']) / games
+                    dict['season_averages']['fg3_attempts'] = ((old_games * dict['season_averages']['fg3_attempts']) + datum['fg3_attempts']) / games
                     if (datum['fg3_attempts'] > 0):
-                        dict['season_averages']['fg3_pct'] = round((dict['season_averages']['fg3'] / dict['season_averages']['fg3_attempts']), 4)
-                    dict['season_averages']['ft'] = (dict['season_averages']['ft'] + datum['ft']) / games
-                    dict['season_averages']['ft_attempts'] = (dict['season_averages']['ft_attempts'] + datum['ft_attempts']) / games
+                        dict['season_averages']['fg3_pct'] = (dict['season_averages']['fg3'] / dict['season_averages']['fg3_attempts'])
+                    dict['season_averages']['ft'] = ((old_games * dict['season_averages']['ft']) + datum['ft']) / games
+                    dict['season_averages']['ft_attempts'] = ((old_games * dict['season_averages']['ft_attempts']) + datum['ft_attempts']) / games
                     if (datum['ft_attempts'] > 0):
-                        dict['season_averages']['ft_pct'] = round((dict['season_averages']['ft'] / dict['season_averages']['ft_attempts']), 4)
-                    dict['season_averages']['orb'] = (dict['season_averages']['orb'] + datum['orb']) / games
-                    dict['season_averages']['drb'] = (dict['season_averages']['drb'] + datum['drb']) / games
-                    dict['season_averages']['reb'] = (dict['season_averages']['reb'] + datum['reb']) / games
-                    dict['season_averages']['ast'] = (dict['season_averages']['ast'] + datum['ast']) / games
-                    dict['season_averages']['stl'] = (dict['season_averages']['stl'] + datum['stl']) / games
-                    dict['season_averages']['blk'] = (dict['season_averages']['blk'] + datum['blk']) / games
-                    dict['season_averages']['turnovers'] = (dict['season_averages']['turnovers'] + datum['turnovers']) / games
-                    dict['season_averages']['fouls'] = (dict['season_averages']['fouls'] + datum['fouls']) / games
-                    dict['season_averages']['pts'] = (dict['season_averages']['pts'] + datum['pts']) / games
+                        dict['season_averages']['ft_pct'] = (dict['season_averages']['ft'] / dict['season_averages']['ft_attempts'])
+                    dict['season_averages']['orb'] = ((old_games * dict['season_averages']['orb']) + datum['orb']) / games
+                    dict['season_averages']['drb'] = ((old_games * dict['season_averages']['drb']) + datum['drb']) / games
+                    dict['season_averages']['reb'] = ((old_games * dict['season_averages']['reb']) + datum['reb']) / games
+                    dict['season_averages']['ast'] = ((old_games *dict['season_averages']['ast']) + datum['ast']) / games
+                    dict['season_averages']['stl'] = ((old_games * dict['season_averages']['stl']) + datum['stl']) / games
+                    dict['season_averages']['blk'] = ((old_games * dict['season_averages']['blk']) + datum['blk']) / games
+                    dict['season_averages']['turnovers'] = ((old_games * dict['season_averages']['turnovers']) + datum['turnovers']) / games
+                    dict['season_averages']['fouls'] = ((old_games *  dict['season_averages']['fouls']) + datum['fouls']) / games
+                    dict['season_averages']['pts'] = ((old_games *  dict['season_averages']['pts']) + datum['pts']) / games
                     if (datum['plus_minus'] is not None):
-                        dict['season_averages']['plus_minus'] = (dict['season_averages']['plus_minus'] + datum['plus_minus']) / games
+                        dict['season_averages']['plus_minus'] = ((old_games *  dict['season_averages']['plus_minus']) + datum['plus_minus']) / games
                 collection.replace_one({'_id': dict['_id']}, dict)
 
     # given each players statline from the website, this method cleans the data 
@@ -222,10 +223,10 @@ if ((intDate - lastDay).days <= 0):
             results = results + rows
         clean_player_data(results)
 
-    #username = os.getenv("USERNAME_MONGO")
-    #password = os.getenv("PASSWORD_MONGO")
-    username = os.environ["USERNAME_MDB"]
-    password = os.environ["PASSWORD_MDB"]
+    username = os.getenv("USERNAME_MONGO")
+    password = os.getenv("PASSWORD_MONGO")
+    #username = os.environ["USERNAME_MDB"]
+    #password = os.environ["PASSWORD_MDB"]
     cluster = pymongo.MongoClient(f"mongodb+srv://{username}:{password}@nodecluster.gknsvxa.mongodb.net/?retryWrites=true&w=majority")
     db = cluster["basketball-data"]
     collection = db["stats"]
@@ -248,10 +249,11 @@ if ((intDate - lastDay).days <= 0):
     mean_positions = list(mean_positions_collection.find({}))
     median_positions = list(median_positions_collection.find({}))
 
-    scrape_game_links()
-    for link in links:
-        scrape_player_data(link)
-
+    #scrape_game_links()
+    #for link in links:
+    #    scrape_player_data(link)
+    #scrape_player_data("https://www.basketball-reference.com/boxscores/202302240MIL.html")
+    #scrape_player_data("https://www.basketball-reference.com/boxscores/202302240LAC.html")
     # checks if a metric is a rate stat, returns whether or not the rate stat has any attempts to make it valid
     # param: (item) - individual player's stats
     # param: (metric) - the stat being analyzed
@@ -353,6 +355,9 @@ if ((intDate - lastDay).days <= 0):
                                     if (is_empty_rate_stat(item, key)):
                                         comp[key] = 0
                                     else:
+                                        if (dev_set[key] == 0):
+                                            print(item['name'])
+                                            print(key)
                                         comp[key] = comp[key] / dev_set[key]
                                     if (key != 'attempts' and key != 'ft_attempts'):
                                         value += comp[key]
