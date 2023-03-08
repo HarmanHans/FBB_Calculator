@@ -7,11 +7,13 @@ import pymongo
 from pymongo import MongoClient
 from dotenv import load_dotenv
 import chromedriver_autoinstaller as chromedriver
+from unidecode import unidecode
 
 chromedriver.install()
 
 MONTHS = ["october", "november", "december", "january", "february", "march"]
 filters = [50, 100, 120, 150, 200, 300, 1000]
+pos_filters = [10, 25, 50, 75, 100, 300]
 positions = ["PG", "SG", "SF", "PF", "C"]
 metrics = ['fg_pct', 'ft_pct', 'fg3', 'pts', 'reb', 'ast', 'st', 'blk', 'to']
 player_averages = []
@@ -19,7 +21,6 @@ positional_averages = []
 st_dev_players = []
 st_dev_positions = []
 median_players = []
-median_positions = []
 links = []
 all_data = {}
 data = []
@@ -27,9 +28,34 @@ convert_days = {
     "October": 0,
     "November": 14,
     "December": 44,
-    "January": 75
+    "January": 75,
+    "February": 106,
+    "March": 134
 }
 
+general_stats = {
+    'games': 0,
+    'minutes': 0,
+    'fg': 0,
+    'attempts': 0,
+    'fg_pct': 0,
+    'fg3': 0,
+    'fg3_attempts': 0,
+    'fg3_pct': 0,
+    'ft': 0,
+    'ft_attempts': 0,
+    'ft_pct': 0,
+    'orb': 0,
+    'drb': 0,
+    'reb': 0,
+    'ast': 0,
+    'stl': 0,
+    'blk': 0,
+    'turnovers': 0,
+    'fouls': 0,
+    'pts': 0,
+    'plus_minus': 0
+}
 # creates average datasets based on either top players or positions
 # param: (qualifier) - whether this average set is sorted by position or top X players.
 # param: (list) - the specific list we are storing this data in
@@ -58,7 +84,6 @@ create_average_set(filters, st_dev_players)
 create_average_set(filters, median_players)
 
 create_average_set(positions, st_dev_positions)
-create_average_set(positions, median_positions)
 
 # creates data set to see value of volume + efficiency compared to other players
 # param: (qualifier) - whether this average set is sorted by position or top X players.
@@ -68,34 +93,32 @@ def create_other_stats(qualifier, list):
         other_stats = {}
 
         other_stats['key'] = i
-        other_stats['pts-value'] = -1
-        other_stats['ft-value'] = -1
+        other_stats['pts-value'] = 0
+        other_stats['ft-value'] = 0
         list.append(other_stats)
 
-for i in range(1, len(filters)):
+for i in range(0, len(pos_filters)):
     create_average_set(positions, positional_averages)
 
-for i in range(1, len(filters)):
+for i in range(1, len(pos_filters)):
     create_average_set(positions, st_dev_positions)
 
-for i in range(1, len(filters)):
-    create_average_set(positions, median_positions)
-
-# adds filters to each doc in a dataset
+# adds filters to each positional doc in a dataset
 # param: (list) - the dataset we're appending filters to
+# param: (repetitions) - 
 def filterize_dataset(list, repetitions):
     count = 1
     index = 0
     for dict in list:
-        dict['filter'] = filters[index]
+        dict['filter'] = pos_filters[index]
         if (count == repetitions):
             count = 0
             index += 1
         count += 1
 
+
 filterize_dataset(positional_averages, 5)
 filterize_dataset(st_dev_positions, 5)
-filterize_dataset(median_positions, 5)
 
 # access database
 load_dotenv()
@@ -130,7 +153,7 @@ def convert_minutes(str):
 def open_page(url):
     browser = webdriver.Chrome()
     browser.get(url)
-    time.sleep(5)
+    time.sleep(2)
     html = browser.page_source
     soup = BeautifulSoup(html, 'html.parser')
     return soup
@@ -161,6 +184,7 @@ def get_player_position():
     
     browser = webdriver.Chrome()
     browser.get(url)
+    browser.maximize_window()
     time.sleep(3)
     click_element(browser, player_list_element)
     click_element(browser, all_player_option)
@@ -199,9 +223,7 @@ def get_player_position():
         nameBox = nameRow.find("a")
         if (nameBox is not None):
             name = nameBox.get_text()
-            # unfortunately had to hardcode, unicodedata seems to not replace š with s
-            if (name == 'Aleksej Pokuševski'):
-                name = 'Aleksej Pokusevski'
+            name = unidecode(name)
             posTab = nameRow.findNext("td").findNext("td").findNext("td").contents[0]
             posEligibility = posTab.split(',')
             if (name != 'PLAYER'):
@@ -211,15 +233,15 @@ def get_player_position():
                 profile['z-value'] = []
                 profile['z-positional_value'] = []
                 profile['season_averages'] = season_averages
-                profile['projections'] = season_averages
+                profile['projections'] = general_stats
                 profile['other-stats'] = []
                 profile['other-stats-pos'] = []
                 create_average_set(filters, profile['z-value'])
                 create_other_stats(filters, profile['other-stats'])
                 for i in range(0, len(profile['pos'])):
-                    create_average_set(filters, profile['z-positional_value'])
+                    create_average_set(pos_filters, profile['z-positional_value'])
                 for i in range(0, len(profile['pos'])):
-                    create_other_stats(filters, profile['other-stats-pos'])
+                    create_other_stats(pos_filters, profile['other-stats-pos'])
                 replace_key(profile, 'z-value')
                 replace_key(profile, 'z-positional_value')
                 data.append(profile)
@@ -241,47 +263,49 @@ def convert_date(date_heading):
 # param: (datum) - the stats set for an entire game
 # param: (name) - the name of the given player
 def append_data(datum, name):
-    for dict in data:
+    for dict in complete_data:
         if (name == dict['name']):
             dict['games'].append(datum)
             if (datum['minutes'] > -1):
+                old_games = dict['season_averages']['games']
                 dict['season_averages']['games'] = dict['season_averages']['games'] + 1
                 games = dict['season_averages']['games']
-                dict['season_averages']['minutes'] = round((dict['season_averages']['minutes'] + datum['minutes']) / games, 2)
-                dict['season_averages']['fg'] = (dict['season_averages']['fg'] + datum['fg']) / games
-                dict['season_averages']['attempts'] = (dict['season_averages']['attempts'] + datum['attempts']) / games
+                dict['season_averages']['minutes'] = ((old_games * dict['season_averages']['minutes']) + datum['minutes']) / games
+                dict['season_averages']['fg'] = ((old_games * dict['season_averages']['fg']) + datum['fg']) / games
+                dict['season_averages']['attempts'] = ((old_games * dict['season_averages']['attempts']) + datum['attempts']) / games
                 if (datum['fg'] > 0):
-                    dict['season_averages']['fg_pct'] = round((dict['season_averages']['fg'] / dict['season_averages']['attempts']), 4)
-                dict['season_averages']['fg3'] = (dict['season_averages']['fg3'] + datum['fg3']) / games
-                dict['season_averages']['fg3_attempts'] = (dict['season_averages']['fg3_attempts'] + datum['fg3_attempts']) / games
+                    dict['season_averages']['fg_pct'] = (dict['season_averages']['fg'] / dict['season_averages']['attempts'])
+                dict['season_averages']['fg3'] = ((old_games * dict['season_averages']['fg3']) + datum['fg3']) / games
+                dict['season_averages']['fg3_attempts'] = ((old_games * dict['season_averages']['fg3_attempts']) + datum['fg3_attempts']) / games
                 if (datum['fg3_attempts'] > 0):
-                    dict['season_averages']['fg3_pct'] = round((dict['season_averages']['fg3'] / dict['season_averages']['fg3_attempts']), 4)
-                dict['season_averages']['ft'] = (dict['season_averages']['ft'] + datum['ft']) / games
-                dict['season_averages']['ft_attempts'] = (dict['season_averages']['ft_attempts'] + datum['ft_attempts']) / games
+                    dict['season_averages']['fg3_pct'] = (dict['season_averages']['fg3'] / dict['season_averages']['fg3_attempts'])
+                dict['season_averages']['ft'] = ((old_games * dict['season_averages']['ft']) + datum['ft']) / games
+                dict['season_averages']['ft_attempts'] = ((old_games * dict['season_averages']['ft_attempts']) + datum['ft_attempts']) / games
                 if (datum['ft_attempts'] > 0):
-                    dict['season_averages']['ft_pct'] = round((dict['season_averages']['ft'] / dict['season_averages']['ft_attempts']), 4)
-                dict['season_averages']['orb'] = (dict['season_averages']['orb'] + datum['orb']) / games
-                dict['season_averages']['drb'] = (dict['season_averages']['drb'] + datum['drb']) / games
-                dict['season_averages']['reb'] = (dict['season_averages']['reb'] + datum['reb']) / games
-                dict['season_averages']['ast'] = (dict['season_averages']['ast'] + datum['ast']) / games
-                dict['season_averages']['stl'] = (dict['season_averages']['stl'] + datum['stl']) / games
-                dict['season_averages']['blk'] = (dict['season_averages']['blk'] + datum['blk']) / games
-                dict['season_averages']['turnovers'] = (dict['season_averages']['turnovers'] + datum['turnovers']) / games
-                dict['season_averages']['fouls'] = (dict['season_averages']['fouls'] + datum['fouls']) / games
-                dict['season_averages']['pts'] = (dict['season_averages']['pts'] + datum['pts']) / games
+                    dict['season_averages']['ft_pct'] = (dict['season_averages']['ft'] / dict['season_averages']['ft_attempts'])
+                dict['season_averages']['orb'] = ((old_games * dict['season_averages']['orb']) + datum['orb']) / games
+                dict['season_averages']['drb'] = ((old_games * dict['season_averages']['drb']) + datum['drb']) / games
+                dict['season_averages']['reb'] = ((old_games * dict['season_averages']['reb']) + datum['reb']) / games
+                dict['season_averages']['ast'] = ((old_games *dict['season_averages']['ast']) + datum['ast']) / games
+                dict['season_averages']['stl'] = ((old_games * dict['season_averages']['stl']) + datum['stl']) / games
+                dict['season_averages']['blk'] = ((old_games * dict['season_averages']['blk']) + datum['blk']) / games
+                dict['season_averages']['turnovers'] = ((old_games * dict['season_averages']['turnovers']) + datum['turnovers']) / games
+                dict['season_averages']['fouls'] = ((old_games *  dict['season_averages']['fouls']) + datum['fouls']) / games
+                dict['season_averages']['pts'] = ((old_games *  dict['season_averages']['pts']) + datum['pts']) / games
                 if (datum['plus_minus'] is not None):
-                    dict['season_averages']['plus_minus'] = (dict['season_averages']['plus_minus'] + datum['plus_minus']) / games
+                    dict['season_averages']['plus_minus'] = ((old_games *  dict['season_averages']['plus_minus']) + datum['plus_minus']) / games
+                collection.replace_one({'_id': dict['_id']}, dict)
 
 # retrieves the box score of every single NBA game played in the months given to it.
 # param: (month) - the month we are getting data from
 def scrape_game_links(month):
-    print(month)
     url = f"https://www.basketball-reference.com/leagues/NBA_2023_games-{month}.html"
     soup = open_page(url)
     linkBox = soup.find_all("td", {"data-stat": "box_score_text"})
     for box in linkBox:
-        link = "https://www.basketball-reference.com" + box.find("a").get("href")
-        links.append(link)
+        if (box.find("a") is not None):
+            link = "https://www.basketball-reference.com" + box.find("a").get("href")
+            links.append(link)
 
 # given each players statline from the website, this method cleans the data 
 # and divides it into separate stats
@@ -293,6 +317,8 @@ def clean_player_data(results, day):
 
         nameBox = result.find("th", {"data-stat": "player"})
         name = nameBox.find("a").get_text()
+        name = unidecode(name)
+        print(name)
         # if player did not play
         if (result.find("td", {"data-stat": "reason"})):
             minutes = -1
@@ -382,16 +408,6 @@ def scrape_player_data(link):
         results = results + rows
     clean_player_data(results, day)
 
-for month in MONTHS:
-    scrape_game_links(month)
-for link in links:
-    scrape_player_data(link)
-
-get_player_position()
-# testing scraping below
-#scrape_player_data("https://www.basketball-reference.com/boxscores/202210270SAC.html")
-#scrape_player_data("https://www.basketball-reference.com/boxscores/202212230PHO.html")
-#scrape_player_data("https://www.basketball-reference.com/boxscores/202301130DET.html")
 db = cluster["basketball-data"]
 
 collection = db["stats"]
@@ -400,7 +416,8 @@ pos_collection = db["positional-averages"]
 st_dev_players_collection = db["st_dev_players"]
 median_players_collection = db["median_players"]
 st_dev_positions_collection = db["st_dev_positions"]
-median_positions_collection = db["median_positions"]
+
+get_player_position()
 
 collection.insert_many(data)
 average_collection.insert_many(player_averages)
@@ -408,29 +425,19 @@ pos_collection.insert_many(positional_averages)
 st_dev_players_collection.insert_many(st_dev_players)
 median_players_collection.insert_many(median_players)
 st_dev_positions_collection.insert_many(st_dev_positions)
-median_positions_collection.insert_many(median_positions)
 
+complete_data = list(collection.find({}))
 
+# testing scraping below
+#scrape_player_data("https://www.basketball-reference.com/boxscores/202210270SAC.html")
+#scrape_player_data("https://www.basketball-reference.com/boxscores/202212230PHO.html")
+#scrape_player_data("https://www.basketball-reference.com/boxscores/202301130DET.html")
 
+for month in MONTHS:
+    scrape_game_links(month)
 
+for link in links:
+    scrape_player_data(link)
+    # if data scraping fails at some point, I can figure out which game it stops
+    print(link)
 
-# TODO: get every box-score (DONE!)
-# TODO: get player stats from each box score (DONE!)
-# TODO: every player needs to have their stats from each game (probably done, either that or simple to do)
-# TODO: every player needs to have season averages based on each game
-    #TODO: for averages, a game where they score 0 bc they didn't play is different than a 0 point game. 
-    #      same for other stats.
-# TODO: find out how to scroll down in webpage, so position scraper doesn't crash
-# TODO: find way to store players and their positions. then when we find a player in a box score, we add their game stats to the players identity (DONE!)
-    # probably in JSON form
-
-
-# The value in players is how good they are compared to average and how unique they are
-# the difference between a player and the 10th best player in that category matters to see top end potential
-# how far off the average are players? if most people are closer to average, then i guess the difference matters more. 
-# how to update the tables in MongoDB with the calculations done here
-
-
-
-
-    
