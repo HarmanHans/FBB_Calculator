@@ -13,7 +13,7 @@ import chromedriver_autoinstaller as chromedriver
 from unidecode import unidecode
 
 chromedriver.install()
-
+chromedriver().forceDownload().setup()
 
 # needs to be until the last day of the NBA regular season
 links = []
