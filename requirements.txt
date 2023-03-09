@@ -1,5 +1,6 @@
 bs4
 selenium
 pymongo
-dotenv
+python-dotenv
 chromedriver_autoinstaller
+unidecode
