@@ -64,6 +64,7 @@ if ((intDate - lastDay).days <= 0):
         chrome_options.add_argument("--headless")
         chrome_options.add_argument("--disable-gpu")
         browser = webdriver.Chrome(options=chrome_options)
+        print(url)
         browser.get(url)
         time.sleep(5)
         html = browser.page_source
