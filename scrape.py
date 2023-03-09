@@ -10,6 +10,7 @@ import pymongo
 from pymongo import MongoClient
 from dotenv import load_dotenv
 import chromedriver_autoinstaller as chromedriver
+from unidecode import unidecode
 
 chromedriver.install()
 
@@ -19,10 +20,16 @@ data = []
 # number of players to sort by in table
 filters = [50, 100, 120, 150, 200, 300, 1000]
 
-metrics = ['fg_pct', 'ft_pct', 'fg3', 'pts', 'reb', 'ast', 'stl', 'blk', 'turnovers', 'attempts', 'ft_attempts']
+metrics = ['minutes', 'fg3', 'pts', 'reb', 'ast', 'stl', 'blk', 'turnovers', 'attempts', 'ft_attempts', 'fg_pct', 'ft_pct']
 CATEGORIES = 9
 # inverse weight on attempts for 'other stats' metrics
 SCALER = 3
+# for rate stats, helps set minimum volume to be counted
+THRESH_SCALER = 1.75
+# helps set min minutes requirement when accounting for turnovers
+TO_SCALER = 1.25
+# the limit at which we cap z scores when adjusting for outlying categories
+OUTLIER_LIMIT = 2
 
 load_dotenv()
 
@@ -136,6 +143,7 @@ if ((intDate - lastDay).days <= 0):
 
             nameBox = result.find("th", {"data-stat": "player"})
             name = nameBox.find("a").get_text()
+            name = unidecode(name)
             # if player did not play
             if (result.find("td", {"data-stat": "reason"})):
                 minutes = -1
@@ -223,10 +231,10 @@ if ((intDate - lastDay).days <= 0):
             results = results + rows
         clean_player_data(results)
 
-    username = os.getenv("USERNAME_MONGO")
-    password = os.getenv("PASSWORD_MONGO")
-    #username = os.environ["USERNAME_MDB"]
-    #password = os.environ["PASSWORD_MDB"]
+    #username = os.getenv("USERNAME_MONGO")
+    #password = os.getenv("PASSWORD_MONGO")
+    username = os.environ["USERNAME_MDB"]
+    password = os.environ["PASSWORD_MDB"]
     cluster = pymongo.MongoClient(f"mongodb+srv://{username}:{password}@nodecluster.gknsvxa.mongodb.net/?retryWrites=true&w=majority")
     db = cluster["basketball-data"]
     collection = db["stats"]
@@ -249,11 +257,10 @@ if ((intDate - lastDay).days <= 0):
     mean_positions = list(mean_positions_collection.find({}))
     median_positions = list(median_positions_collection.find({}))
 
-    #scrape_game_links()
-    #for link in links:
-    #    scrape_player_data(link)
-    #scrape_player_data("https://www.basketball-reference.com/boxscores/202302240MIL.html")
-    #scrape_player_data("https://www.basketball-reference.com/boxscores/202302240LAC.html")
+    scrape_game_links()
+    for link in links:
+        scrape_player_data(link)
+        
     # checks if a metric is a rate stat, returns whether or not the rate stat has any attempts to make it valid
     # param: (item) - individual player's stats
     # param: (metric) - the stat being analyzed
@@ -265,20 +272,50 @@ if ((intDate - lastDay).days <= 0):
             if (item['season_averages']['ft_attempts'] == 0):
                 return True
         return False
-    
+
     # finds the average of a given metric based on how many players are compared
     # param: (stat_set) - Dictionary. dictionary containing averages of top X players.
     # param: (metric) - String. represents metric that we are comparing.
     def mean_data(stat_set, metric):
+        if (metric == 'turnovers' or metric == 'fg_pct' or metric == 'ft_pct'):
+            updated_averages = list(average_collection.find({}))
         limit = stat_set['key']
-        sorted_list = sorted(complete_data, key=lambda i : i['season_averages'][metric], reverse=True)
+        if (metric == 'turnovers'):
+            sorted_list = sorted(complete_data, key=lambda i : i['season_averages'][metric])
+        else:
+            sorted_list = sorted(complete_data, key=lambda i : i['season_averages'][metric], reverse=True)
         sum = 0
         player_count = 0
 
         for item in sorted_list:
-            if(is_empty_rate_stat(item, metric)):
-                continue
+            if (metric == 'fg_pct' or metric == 'ft_pct'):
+                if(is_empty_rate_stat(item, metric)):
+                    continue
             if (item['season_averages']['games'] > 0 and player_count < limit):
+                if (metric == 'fg_pct'):
+                    thresh = 0
+                    for averages in updated_averages:
+                        if averages['key'] == limit:
+                            thresh = float(averages['attempts'] / THRESH_SCALER)
+                    if (item['season_averages']['attempts'] < thresh):
+                        continue
+                
+                if (metric == 'ft_pct'):
+                    thresh = 0
+                    for averages in updated_averages:
+                        if (averages['key'] == limit):
+                            thresh = float(averages['ft_attempts'] / THRESH_SCALER)
+                    if (item['season_averages']['ft_attempts'] < thresh):
+                        continue
+                
+                if (metric == 'turnovers'):
+                    thresh = 0
+                    for averages in updated_averages:
+                        if (averages['key'] == limit):
+                            thresh = float(averages['minutes'] / TO_SCALER)
+                    if (item['season_averages']['minutes'] < thresh):
+                        continue
+
                 player_count += 1
                 sum += item['season_averages'][metric]
         stat_set['games'] = player_count
@@ -289,14 +326,44 @@ if ((intDate - lastDay).days <= 0):
     # param: (stat_set) - Dictionary. dictionary containing the stats of players.
     # param: (metric) - String. represents metric that we are comparing.
     def positional_mean(stat_set, metric):
+        if (metric == 'turnovers' or metric == 'fg_pct' or metric == 'ft_pct'):
+            updated_averages = list(positional_collection.find({}))
         limit = stat_set['filter']
-        sorted_list = sorted(complete_data, key=lambda i : i['season_averages'][metric], reverse=True)
+        if (metric == 'turnovers'):
+            sorted_list = sorted(complete_data, key=lambda i : i['season_averages'][metric])
+        else:
+            sorted_list = sorted(complete_data, key=lambda i : i['season_averages'][metric], reverse=True)
         sum = 0
         player_count = 0
         for item in sorted_list:
-            if(is_empty_rate_stat(item, metric)):
-                continue
+            if (metric == 'fg_pct' or metric == 'ft_pct'):
+                if(is_empty_rate_stat(item, metric)):
+                    continue
             if (stat_set['key'] in item['pos'] and item['season_averages']['games'] > 0 and player_count < limit):
+                if (metric == 'fg_pct'):
+                    thresh = 0
+                    for averages in updated_averages:
+                        if (averages['key'] in item['pos'] and averages['filter'] == limit):
+                            thresh = float(averages['attempts'] / THRESH_SCALER)
+                    if (item['season_averages']['attempts'] < thresh):
+                        continue
+                
+                if (metric == 'ft_pct'):
+                    thresh = 0
+                    for averages in updated_averages:
+                        if (averages['key'] in item['pos'] and averages['filter'] == limit):
+                            thresh = float(averages['ft_attempts'] / THRESH_SCALER)
+                    if (item['season_averages']['ft_attempts'] < thresh):
+                        continue
+
+                if (metric == 'turnovers'):
+                    thresh = 0
+                    for averages in updated_averages:
+                        if (averages['key'] == limit):
+                            thresh = float(averages['minutes'] / TO_SCALER)
+                    if (item['season_averages']['minutes'] < thresh):
+                        continue
+
                 player_count += 1
                 sum += item['season_averages'][metric]
         stat_set['games'] = player_count
@@ -329,6 +396,17 @@ if ((intDate - lastDay).days <= 0):
                             dev_set[metric] = st_dev
             st_dev_positions_collection.replace_one({'_id': dev_set['_id']}, dev_set)
     
+    # if a category exceeds a given outlier, it maxes out at a limit
+    # param: (score) - z-score of a given category
+    # param: (capped_value) - the running sum of the z-scores (capped)
+    def cap_categories(score):
+        if (score < -(OUTLIER_LIMIT)):
+            return -OUTLIER_LIMIT
+        elif (score > OUTLIER_LIMIT):
+            return OUTLIER_LIMIT
+        else:
+            return score
+    
     # updates the z score of each player comparing only to others who play their position
     # some stats are really out there: percentages, blk, stl 
     def update_positional_z_score():
@@ -338,6 +416,7 @@ if ((intDate - lastDay).days <= 0):
                 index = 0
                 for comp in item['z-positional_value']:
                     value = 0
+                    capped_value = 0
                     if (count % 8 == 0):
                         index += 1
                     pos = item['pos'][index]
@@ -347,7 +426,10 @@ if ((intDate - lastDay).days <= 0):
                             if (mean_set['filter'] == comp['key']):
                                 for key in mean_set:
                                     if (key != '_id' and key != 'key' and key != 'games' and key != 'filter'):
-                                        comp[key] = item['season_averages'][key] - mean_set[key]
+                                        #if (key == 'turnovers'):
+                                        #    comp[key] = mean_set[key] - item['season_averages'][key]
+                                        #else:
+                                            comp[key] = item['season_averages'][key] - mean_set[key]
                     for dev_set in st_dev_positions:
                         if(dev_set['key'] == comp['pos'] and dev_set['filter'] < 301 and dev_set['filter'] == comp['key']):
                             for key in dev_set:   
@@ -356,12 +438,14 @@ if ((intDate - lastDay).days <= 0):
                                         comp[key] = 0
                                     else:
                                         if (dev_set[key] == 0):
-                                            print(item['name'])
-                                            print(key)
-                                        comp[key] = comp[key] / dev_set[key]
-                                    if (key != 'attempts' and key != 'ft_attempts'):
+                                            comp[key] = 0
+                                        else:
+                                            comp[key] = comp[key] / dev_set[key]
+                                    if (key != 'attempts' and key != 'ft_attempts' and key != 'minutes'):
                                         value += comp[key]
+                                        capped_value += cap_categories(comp[key])
                     comp['value'] = value / CATEGORIES
+                    comp['capped_value'] = capped_value / CATEGORIES
                     count += 1
             collection.replace_one({'_id': item['_id']}, item)
 
@@ -373,7 +457,7 @@ if ((intDate - lastDay).days <= 0):
         for set in median_players:
             limit = set['key']
             for key in set:
-                if (key != '_id' and key != 'key'):
+                if (key != '_id' and key != 'key' and key != 'games'):
                     sorted_list = sorted(complete_data, key=lambda i : i['season_averages'][key], reverse=True)
                     for item in sorted_list:
                         if(is_empty_rate_stat(item, key)):
@@ -418,19 +502,26 @@ if ((intDate - lastDay).days <= 0):
             if(item['season_averages']['games'] > 0):
                 for comp in item['z-value']:
                     value = 0
+                    capped_value = 0
                     for mean_set in average_stats:
                         if(mean_set['key'] == comp['key']):
                             for key in mean_set:
                                 if (key != '_id' and key != 'key' and key != 'games'):
-                                    comp[key] = item['season_averages'][key] - mean_set[key] 
+                                    if (key == 'turnovers'):
+                                        comp[key] = mean_set[key] - item['season_averages'][key]
+                                    else:
+                                        comp[key] = item['season_averages'][key] - mean_set[key]
                     for dev_set in st_dev_players:
                         if(dev_set['key'] == comp['key']):
                             for key in dev_set:
                                 if (key != '_id' and key != 'key' and key != 'games'):
                                     comp[key] = comp[key] / dev_set[key]
-                                    if (key != '_id' and key != 'key' and key != 'games' and key != 'attempts' and key != 'ft_attempts'):
+                                    if (key != '_id' and key != 'key' and key != 'games' and key != 'attempts' 
+                                        and key != 'ft_attempts' and key != 'minutes'):
                                         value += comp[key]
+                                        capped_value += cap_categories(comp[key])
                     comp['value'] = value / CATEGORIES
+                    comp['capped_value'] = capped_value / CATEGORIES
             collection.replace_one({'_id': item['_id']}, item)
 
     # creates valuation of volume and efficiency of player scoring and free throws
@@ -478,6 +569,11 @@ if ((intDate - lastDay).days <= 0):
                     count += 1
             collection.replace_one({'_id': item['_id']}, item)
     
+    # if I want to factor in CV when determining value
+    def coefficent_of_variance():
+        for item in st_dev_players:
+            limit = item['key']
+
     for stat_set in average_stats:
         for metric in metrics:
             mean_data(stat_set, metric)
@@ -493,3 +589,5 @@ if ((intDate - lastDay).days <= 0):
     update_positional_z_score()
     update_other_stats()
     update_other_stats_pos()
+
+    # can calculate coefficient of variance to see what outliers matter more
