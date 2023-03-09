@@ -232,6 +232,7 @@ if ((intDate - lastDay).days <= 0):
         tables = []
         results = []
         soup = open_page(link)
+        print("here")
         matchup = soup.find("table", {"id": "line_score"})
         team_boxes = matchup.find_all("th", {"data-stat": "team"})
         for team_box in team_boxes:
