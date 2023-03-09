@@ -1,9 +1,9 @@
 name: run scrape.py
 
 on:
-  workflow_dispatch
-  #schedule:
-  #  - cron: "30 6 * * *"
+  # workflow_dispatch (testing purposes)
+  schedule:
+    - cron: "30 6 * * *"
 
 jobs:
   build:
