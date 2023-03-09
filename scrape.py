@@ -54,6 +54,10 @@ if ((intDate - lastDay).days <= 0):
     # returns: an html of the given page to process
     def open_page(url):
         chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument("start-maximized")
+        chrome_options.add_argument("enable-automation")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("--disable-browser-side-navigation")
         chrome_options.add_argument('--no-sandbox')
         chrome_options.add_argument('--window-size=1420,1080')
         chrome_options.add_argument('--headless')
