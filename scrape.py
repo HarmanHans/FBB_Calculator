@@ -62,6 +62,7 @@ if ((intDate - lastDay).days <= 0):
         chrome_options.add_argument("--disable-extensions")
         chrome_options.add_argument("--headless")
         chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_experimental_option('extensionLoadTimeout', 60000)
         browser = webdriver.Chrome(options=chrome_options)
         print(url)
         browser.get(url)
