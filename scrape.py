@@ -260,10 +260,11 @@ if ((intDate - lastDay).days <= 0):
     scrape_game_links()
     for link in links:
         scrape_player_data(link)
-        
+
     # checks if a metric is a rate stat, returns whether or not the rate stat has any attempts to make it valid
     # param: (item) - individual player's stats
     # param: (metric) - the stat being analyzed
+    # returns whether or not a rate state is based on attempts
     def is_empty_rate_stat(item, metric):
         if (metric == 'fg_pct'):
             if (item['season_averages']['attempts'] == 0):
@@ -398,7 +399,7 @@ if ((intDate - lastDay).days <= 0):
     
     # if a category exceeds a given outlier, it maxes out at a limit
     # param: (score) - z-score of a given category
-    # param: (capped_value) - the running sum of the z-scores (capped)
+    # returns either the z-score of a value, or a capped z score
     def cap_categories(score):
         if (score < -(OUTLIER_LIMIT)):
             return -OUTLIER_LIMIT
