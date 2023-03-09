@@ -47,6 +47,7 @@ if ((intDate - lastDay).days <= 0):
     diff = (intDate - tipOff).days
 
     url = f"https://www.basketball-reference.com/boxscores/?month={month}&day={day}&year={year}"
+    print(url)
 
     # opens a webpage to extract its url
     # param: a string that represents a url
