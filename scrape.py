@@ -14,6 +14,7 @@ from unidecode import unidecode
 
 chromedriver.install()
 
+
 # needs to be until the last day of the NBA regular season
 links = []
 data = []
@@ -51,7 +52,12 @@ if ((intDate - lastDay).days <= 0):
     # param: a string that represents a url
     # returns: an html of the given page to process
     def open_page(url):
-        browser = webdriver.Chrome()
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--window-size=1420,1080')
+        chrome_options.add_argument('--headless')
+        chrome_options.add_argument('--disable-gpu')
+        browser = webdriver.Chrome(chrome_options=chrome_options)
         browser.get(url)
         time.sleep(5)
         html = browser.page_source
