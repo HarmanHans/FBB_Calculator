@@ -61,6 +61,7 @@ if ((intDate - lastDay).days <= 0):
         chrome_options.add_argument('--no-sandbox')
         chrome_options.add_argument('--window-size=1420,1080')
         #chrome_options.add_argument('--headless')
+        chrome_options.headless = True
         chrome_options.add_argument('--disable-gpu')
         browser = webdriver.Chrome(options=chrome_options)
         browser.get(url)
