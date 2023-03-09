@@ -34,7 +34,7 @@ OUTLIER_LIMIT = 2
 
 load_dotenv()
 
-currentDay = str(date.today() - timedelta(days = 1))
+currentDay = str(date.today() - timedelta(days = 2))
 dateString = currentDay.split("-")
 year = dateString[0]
 month = dateString[1]
