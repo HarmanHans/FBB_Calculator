@@ -11,6 +11,8 @@ from pymongo import MongoClient
 from dotenv import load_dotenv
 import chromedriver_autoinstaller as chromedriver
 from unidecode import unidecode
+from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.utils import ChromeType
 
 chromedriver.install()
 
@@ -33,7 +35,7 @@ OUTLIER_LIMIT = 2
 
 load_dotenv()
 
-currentDay = str(date.today() - timedelta(days = 2))
+currentDay = str(date.today() - timedelta(days = 3))
 dateString = currentDay.split("-")
 year = dateString[0]
 month = dateString[1]
@@ -63,11 +65,14 @@ if ((intDate - lastDay).days <= 0):
         chrome_options.add_argument("--headless")
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_experimental_option('extensionLoadTimeout', 60000)
-        browser = webdriver.Chrome(options=chrome_options)
+        chrome_service = ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()
+        browser = webdriver.Chrome(service=chrome_service, options=chrome_options)
         print(url)
         browser.get(url)
         time.sleep(5)
         html = browser.page_source
+        print(html)
+
         soup = BeautifulSoup(html, 'html.parser')
         return soup
 
