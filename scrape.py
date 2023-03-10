@@ -14,6 +14,7 @@ from unidecode import unidecode
 from selenium.webdriver.chrome.service import Service as ChromiumService
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.core.utils import ChromeType
+import pandas as pd
 
 chromedriver.install()
 
@@ -68,9 +69,10 @@ if ((intDate - lastDay).days <= 0):
         #chrome_service = ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()
         browser = webdriver.Chrome(service=ChromiumService(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()), options=chrome_options)
         print(url)
-        browser.get(url)
+        #browser.get(url)
+        html = pd.read_html(url)
         time.sleep(5)
-        html = browser.page_source
+        #html = browser.page_source
         soup = BeautifulSoup(html, 'html.parser')
         return soup
 
