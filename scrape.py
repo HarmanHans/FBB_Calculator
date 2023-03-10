@@ -67,7 +67,7 @@ if ((intDate - lastDay).days <= 0):
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_experimental_option('extensionLoadTimeout', 60000)
         #chrome_service = ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()
-        browser = webdriver.Chrome(service=ChromiumService(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()), options=chrome_options)
+        # browser = webdriver.Chrome(service=ChromiumService(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()), options=chrome_options)
         print(url)
         #browser.get(url)
         html = pd.read_html(url)
