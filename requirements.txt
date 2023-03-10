@@ -4,5 +4,5 @@ pymongo
 python-dotenv
 chromedriver_autoinstaller
 unidecode
-webdriver-manager
 pandas
+lxml
