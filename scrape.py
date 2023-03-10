@@ -11,8 +11,9 @@ from pymongo import MongoClient
 from dotenv import load_dotenv
 import chromedriver_autoinstaller as chromedriver
 from unidecode import unidecode
+from selenium.webdriver.chrome.service import Service as ChromiumService
 from webdriver_manager.chrome import ChromeDriverManager
-from webdriver_manager.utils import ChromeType
+from webdriver_manager.core.utils import ChromeType
 
 chromedriver.install()
 
@@ -65,8 +66,8 @@ if ((intDate - lastDay).days <= 0):
         chrome_options.add_argument("--headless")
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_experimental_option('extensionLoadTimeout', 60000)
-        chrome_service = ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()
-        browser = webdriver.Chrome(service=chrome_service, options=chrome_options)
+        #chrome_service = ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()
+        browser = webdriver.Chrome(service=ChromiumService(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()), options=chrome_options)
         print(url)
         browser.get(url)
         time.sleep(5)
