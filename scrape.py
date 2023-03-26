@@ -11,11 +11,12 @@ from pymongo import MongoClient
 from dotenv import load_dotenv
 import chromedriver_autoinstaller as chromedriver
 from unidecode import unidecode
-from selenium.webdriver.chrome.service import Service as ChromiumService
-from webdriver_manager.chrome import ChromeDriverManager
-from webdriver_manager.core.utils import ChromeType
-import pandas as pd
+#from selenium.webdriver.chrome.service import Service as ChromiumService
+#from webdriver_manager.chrome import ChromeDriverManager
+#from webdriver_manager.core.utils import ChromeType
+#import pandas as pd
 import requests
+import urllib.request
 
 chromedriver.install()
 
@@ -38,7 +39,7 @@ OUTLIER_LIMIT = 2
 
 load_dotenv()
 
-currentDay = str(date.today() - timedelta(days = 3))
+currentDay = str(date.today() - timedelta(days = 2))
 dateString = currentDay.split("-")
 year = dateString[0]
 month = dateString[1]
@@ -68,13 +69,15 @@ if ((intDate - lastDay).days <= 0):
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_experimental_option('extensionLoadTimeout', 60000)
         #chrome_service = ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()
-        # browser = webdriver.Chrome(service=ChromiumService(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()), options=chrome_options)
+        #browser = webdriver.Chrome(options=chrome_options)
+        browser = webdriver.Chrome()
         print(url)
-        #browser.get(url)
-        html = requests.get(url)
+        browser.get(url)
+        #html = requests.get(url, timeout=(3.05, 27)).text
         time.sleep(5)
-        #html = browser.page_source
-        soup = BeautifulSoup(html.text, 'html.parser')
+        #html = urllib.request.urlopen(url).read()
+        html = browser.page_source
+        soup = BeautifulSoup(html, 'html.parser')
         return soup
 
     # retrieves the box score of every single NBA game played in the months given to it.
@@ -238,8 +241,8 @@ if ((intDate - lastDay).days <= 0):
         tables = []
         results = []
         soup = open_page(link)
-        print(soup.prettify())
         matchup = soup.find("table", {"id": "line_score"})
+        print(matchup)
         team_boxes = matchup.find_all("th", {"data-stat": "team"})
         for team_box in team_boxes:
             if (team_box.find("a") is not None):
@@ -251,10 +254,10 @@ if ((intDate - lastDay).days <= 0):
             results = results + rows
         clean_player_data(results)
 
-    #username = os.getenv("USERNAME_MONGO")
-    #password = os.getenv("PASSWORD_MONGO")
-    username = os.environ["USERNAME_MDB"]
-    password = os.environ["PASSWORD_MDB"]
+    username = os.getenv("USERNAME_MONGO")
+    password = os.getenv("PASSWORD_MONGO")
+    #username = os.environ["USERNAME_MDB"]
+    #password = os.environ["PASSWORD_MDB"]
     cluster = pymongo.MongoClient(f"mongodb+srv://{username}:{password}@nodecluster.gknsvxa.mongodb.net/?retryWrites=true&w=majority")
     db = cluster["basketball-data"]
     collection = db["stats"]
