@@ -1,0 +1,46 @@
+
+.dropdown a:hover {
+    background-color: #ddd;
+}
+
+.select {
+    background-color: gray;
+    color: white;
+    padding: 16px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+}
+
+.table {
+  font-size: 12px;
+  font-family: 'Nunito', sans-serif;
+}
+
+.header {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: center;
+  font-weight: 800;
+  background: rgb(237,87,87);
+  /*background: linear-gradient(225deg, rgba(255,250,188,1) 0%, rgba(223,131,69,1) 0%, rgba(237,87,87,1) 100%); */
+  color: white;
+  border: #ddd;
+}
+
+.table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.table tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.table td:hover {
+    background-color: #ddd;
+}
+
+#games {
+    font-weight: bold;
+}
