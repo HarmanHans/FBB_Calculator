@@ -1,3 +1,7 @@
+.table {
+  padding-left: 10px;
+  padding-top: 25px;
+}
 
 .dropdown a:hover {
     background-color: #ddd;
@@ -43,4 +47,9 @@
 
 #games {
     font-weight: bold;
+}
+
+.name {
+  font-weight: bold;
+  min-width: 145px;
 }

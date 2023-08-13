@@ -12,8 +12,16 @@ function Calculator() {
 
     const fetchItems = async() => {
         const data = await fetch('/calculator');
-        const items = await data.json();
-        console.log(items);
+        const oldItems = await data.json();
+
+        const items = oldItems.filter(function (a) {
+            return a['season_averages']['games'] > 0;
+        });
+
+        items.sort(function(a,b) {
+            return b["z-value"][3].value - a["z-value"][3].value;
+        });
+
         setItems(items);
     }
 
@@ -37,13 +45,12 @@ function Calculator() {
 
     const [posStatus, setPosStatus] = React.useState(1);
 
-    const radioPosHandler = (posStatus) => {
+    const radioPosHandler = (posStatus) => { 
         setPosStatus(posStatus);
     }
 
-    return(
-        <section class = 'table'>
-            <section class='options'>
+    /*
+                possibly add at some point
                 <div class='options'>
                     <label for="PG">
                         <input type="checkbox" id="PG" name="accept" checked="checked" />  PG
@@ -61,6 +68,11 @@ function Calculator() {
                         <input type="checkbox" id="C" name="accept" checked="checked" />  C
                     </label>
                 </div>
+    */
+
+    return(
+        <section class = 'table'>
+            <section class='options'>
 
                 <div>
                 <fieldset>
@@ -217,98 +229,98 @@ function Calculator() {
                     {status===1 && posStatus===1 && visible===7 && <th class='header top_all'>TO V</th>}
                     {status===1 && posStatus===1 && visible===7 && <th class='header top_all'>V</th>}
                     {status===1 && posStatus===1 && visible===7 && <th class='header top_all'>Capped V</th>}
-                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten'>PTS POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten'>FG3 POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten'>AST POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten'>REB POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten'>STL POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten'>BLK POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten'>FG% POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten'>FT% POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten'>TO POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten'>POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten'>Capped POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive'>PTS POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive'>FG3 POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive'>AST POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive'>REB POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive'>STL POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive'>BLK POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive'>FG% POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive'>FT% POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive'>TO POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive'>POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive'>Capped POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty'>PTS POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty'>FG3 POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty'>AST POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty'>REB POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty'>STL POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty'>BLK POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty'>FG% POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty'>FT% POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty'>TO POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty'>POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty'>Capped POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive'>PTS POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive'>FG3 POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive'>AST POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive'>REB POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive'>STL POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive'>BLK POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive'>FG% POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive'>FT% POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive'>TO POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive'>POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive'>Capped POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred'>PTS POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred'>FG3 POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred'>AST POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred'>REB POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred'>STL POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred'>BLK POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred'>FG% POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred'>FT% POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred'>TO POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred'>POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred'>Capped POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all'>PTS POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all'>FG3 POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all'>AST POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all'>REB POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all'>STL POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all'>BLK POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all'>FG% POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all'>FT% POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all'>TO POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all'>POS Val</th>}
-                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all'>Capped POS Val</th>}
-                    {status===1 && visible===1 && <th class='header other_fifty'>Scoring Value</th>}
-                    {status===1 && visible===1 && <th class='header other_fifty'>FT Value</th>}
-                    {status===1 && visible===2 && <th class='header other_hundred'>Scoring Value</th>}
-                    {status===1 && visible===2 && <th class='header other_hundred'>FT Value</th>}
-                    {status===1 && visible===3 && <th class='header other_onetwenty'>Scoring Value</th>}
-                    {status===1 && visible===3 && <th class='header other_onetwenty'>FT Value</th>}
-                    {status===1 && visible===4 && <th class='header other_onefifty'>Scoring Value</th>}
-                    {status===1 && visible===4 && <th class='header other_onefifty'>FT Value</th>}
-                    {status===1 && visible===5 && <th class='header other_twohundred'>Scoring Value</th>}
-                    {status===1 && visible===5 && <th class='header other_twohundred'>FT Value</th>}
-                    {status===1 && visible===6 && <th class='header other_threehundred'>Scoring Value</th>}
-                    {status===1 && visible===6 && <th class='header other_threehundred'>FT Value</th>}
-                    {status===1 && visible===7 && <th class='header other_all'>Scoring Value</th>}
-                    {status===1 && visible===7 && <th class='header other_all'>FT Value</th>}
-                    {status===1 && posStatus===2 && posVisible===1 && <th class='header other_pos_ten'>POS Scoring Value</th>}
-                    {status===1 && posStatus===2 && posVisible===1 && <th class='header other_pos_ten'>POS FT Value</th>}
-                    {status===1 && posStatus===2 && posVisible===2 && <th class='header other_pos_twentyfive'>POS Scoring Value</th>}
-                    {status===1 && posStatus===2 && posVisible===2 && <th class='header other_pos_twentyfive'>POS FT Value</th>}
-                    {status===1 && posStatus===2 && posVisible===3 && <th class='header other_pos_fifty'>POS Scoring Value</th>}
-                    {status===1 && posStatus===2 && posVisible===3 && <th class='header other_pos_fifty'>POS FT Value</th>}
-                    {status===1 && posStatus===2 && posVisible===4 && <th class='header other_pos_seventyfive'>POS Scoring Value</th>}
-                    {status===1 && posStatus===2 && posVisible===4 && <th class='header other_pos_seventyfive'>POS FT Value</th>}
-                    {status===1 && posStatus===2 && posVisible===5 && <th class='header other_pos_hundred'>POS Scoring Value</th>}
-                    {status===1 && posStatus===2 && posVisible===5 && <th class='header other_pos_hundred'>POS FT Value</th>}
-                    {status===1 && posStatus===2 && posVisible===6 && <th class='header other_pos_all'>POS Scoring Value</th>}
-                    {status===1 && posStatus===2 && posVisible===6 && <th class='header other_pos_all'>POS FT Value</th>}
+                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten'>PTS Val</th>}
+                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten'>FG3 Val</th>}
+                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten'>AST Val</th>}
+                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten'>REB Val</th>}
+                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten'>STL Val</th>}
+                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten'>BLK Val</th>}
+                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten'>FG% Val</th>}
+                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten'>FT% Val</th>}
+                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten'>TO Val</th>}
+                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten'>V</th>}
+                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten'>Capped V</th>}
+                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive'>PTS Val</th>}
+                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive'>FG3 Val</th>}
+                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive'>AST Val</th>}
+                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive'>REB Val</th>}
+                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive'>STL Val</th>}
+                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive'>BLK Val</th>}
+                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive'>FG% Val</th>}
+                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive'>FT% Val</th>}
+                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive'>TO Val</th>}
+                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive'>V</th>}
+                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive'>Capped V</th>}
+                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty'>PTS Val</th>}
+                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty'>FG3 Val</th>}
+                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty'>AST Val</th>}
+                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty'>REB Val</th>}
+                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty'>STL Val</th>}
+                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty'>BLK Val</th>}
+                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty'>FG% Val</th>}
+                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty'>FT% Val</th>}
+                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty'>TO Val</th>}
+                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty'>V</th>}
+                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty'>Capped V</th>}
+                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive'>PTS Val</th>}
+                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive'>FG3 Val</th>}
+                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive'>AST Val</th>}
+                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive'>REB Val</th>}
+                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive'>STL Val</th>}
+                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive'>BLK Val</th>}
+                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive'>FG% Val</th>}
+                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive'>FT% Val</th>}
+                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive'>TO Val</th>}
+                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive'>V</th>}
+                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive'>Capped V</th>}
+                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred'>PTS Val</th>}
+                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred'>FG3 Val</th>}
+                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred'>AST Val</th>}
+                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred'>REB Val</th>}
+                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred'>STL Val</th>}
+                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred'>BLK Val</th>}
+                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred'>FG% Val</th>}
+                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred'>FT% Val</th>}
+                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred'>TO Val</th>}
+                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred'>V</th>}
+                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred'>Capped V</th>}
+                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all'>PTS Val</th>}
+                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all'>FG3 Val</th>}
+                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all'>AST Val</th>}
+                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all'>REB Val</th>}
+                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all'>STL Val</th>}
+                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all'>BLK Val</th>}
+                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all'>FG% Val</th>}
+                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all'>FT% Val</th>}
+                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all'>TO Val</th>}
+                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all'>V</th>}
+                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all'>Capped V</th>}
+                    {status===1 && posStatus===1 && visible===1 && <th class='header other_fifty'>SV</th>}
+                    {status===1 && posStatus===1 && visible===1 && <th class='header other_fifty'>FTV</th>}
+                    {status===1 && posStatus===1 && visible===2 && <th class='header other_hundred'>SV</th>}
+                    {status===1 && posStatus===1 && visible===2 && <th class='header other_hundred'>FTV</th>}
+                    {status===1 && posStatus===1 && visible===3 && <th class='header other_onetwenty'>SV</th>}
+                    {status===1 && posStatus===1 && visible===3 && <th class='header other_onetwenty'>FTV</th>}
+                    {status===1 && posStatus===1 && visible===4 && <th class='header other_onefifty'>SV</th>}
+                    {status===1 && posStatus===1 && visible===4 && <th class='header other_onefifty'>FTV</th>}
+                    {status===1 && posStatus===1 && visible===5 && <th class='header other_twohundred'>SV</th>}
+                    {status===1 && posStatus===1 && visible===5 && <th class='header other_twohundred'>FTV</th>}
+                    {status===1 && posStatus===1 && visible===6 && <th class='header other_threehundred'>SV</th>}
+                    {status===1 && posStatus===1 && visible===6 && <th class='header other_threehundred'>FTV</th>}
+                    {status===1 && posStatus===1 && visible===7 && <th class='header other_all'>SV</th>}
+                    {status===1 && posStatus===1 && visible===7 && <th class='header other_all'>FTV</th>}
+                    {status===1 && posStatus===2 && posVisible===1 && <th class='header other_pos_ten'>SV</th>}
+                    {status===1 && posStatus===2 && posVisible===1 && <th class='header other_pos_ten'>FTV</th>}
+                    {status===1 && posStatus===2 && posVisible===2 && <th class='header other_pos_twentyfive'>SV</th>}
+                    {status===1 && posStatus===2 && posVisible===2 && <th class='header other_pos_twentyfive'>FTV</th>}
+                    {status===1 && posStatus===2 && posVisible===3 && <th class='header other_pos_fifty'>SV</th>}
+                    {status===1 && posStatus===2 && posVisible===3 && <th class='header other_pos_fifty'>FTV</th>}
+                    {status===1 && posStatus===2 && posVisible===4 && <th class='header other_pos_seventyfive'>SV</th>}
+                    {status===1 && posStatus===2 && posVisible===4 && <th class='header other_pos_seventyfive'>FTV</th>}
+                    {status===1 && posStatus===2 && posVisible===5 && <th class='header other_pos_hundred'>SV</th>}
+                    {status===1 && posStatus===2 && posVisible===5 && <th class='header other_pos_hundred'>FTV</th>}
+                    {status===1 && posStatus===2 && posVisible===6 && <th class='header other_pos_all'>SV</th>}
+                    {status===1 && posStatus===2 && posVisible===6 && <th class='header other_pos_all'>FTV</th>}
                     {status===2 && <th class='header proj'>MPG</th>}
                     {status===2 && <th class='header proj'>PPG</th>}
                     {status===2 && <th class='header proj'>3PPG</th>}
@@ -326,7 +338,7 @@ function Calculator() {
                 items.map(item => (
                     <tr key={item.name} id={item.pos[0]}>
                         <td class='rank'>1</td>
-                        <td class='basic'>{item.name}</td>
+                        <td class='basic name'>{item.name}</td>
                         <td class='basic' id = {item.pos[0]}>{item.pos[0]}</td>
                         <td id='games' class='basic'>{item.season_averages.games}</td>
                         {status===1 && <td id='ave' class='season_average'>{Math.round(item.season_averages.minutes * 100) / 100}</td>}
@@ -484,20 +496,20 @@ function Calculator() {
                         {status===1 && posStatus===2 && posVisible===6 && <td class='top_pos_all'>{Math.round(item["z-positional_value"][5].turnovers * 100) / 100}</td>}
                         {status===1 && posStatus===2 && posVisible===6 && <td class='top_pos_all'>{Math.round(item["z-positional_value"][5].value * 100) / 100}</td>}
                         {status===1 && posStatus===2 && posVisible===6 && <td class='top_pos_all'>{Math.round(item["z-positional_value"][5].capped_value * 100) / 100}</td>}
-                        {status===1 && visible===1 && <td class='other_fifty'>{Math.round(item["other-stats"][0]["pts-value"] * 100) / 100}</td>}
-                        {status===1 && visible===1 && <td class='other_fifty'>{Math.round(item["other-stats"][0]["ft-value"] * 100) / 100}</td>}
-                        {status===1 && visible===2 && <td class='other_hundred'>{Math.round(item["other-stats"][1]["pts-value"] * 100) / 100}</td>}
-                        {status===1 && visible===2 && <td class='other_hundred'>{Math.round(item["other-stats"][1]["ft-value"] * 100) / 100}</td>}
-                        {status===1 && visible===3 && <td class='other_onetwenty'>{Math.round(item["other-stats"][2]["pts-value"] * 100) / 100}</td>}
-                        {status===1 && visible===3 && <td class='other_onetwenty'>{Math.round(item["other-stats"][2]["ft-value"] * 100) / 100}</td>}
-                        {status===1 && visible===4 && <td class='other_onefifty'>{Math.round(item["other-stats"][3]["pts-value"] * 100) / 100}</td>}
-                        {status===1 && visible===4 && <td class='other_onefifty'>{Math.round(item["other-stats"][3]["ft-value"] * 100) / 100}</td>}
-                        {status===1 && visible===5 && <td class='other_twohundred'>{Math.round(item["other-stats"][4]["pts-value"] * 100) / 100}</td>}
-                        {status===1 && visible===5 && <td class='other_twohundred'>{Math.round(item["other-stats"][4]["ft-value"] * 100) / 100}</td>}
-                        {status===1 && visible===6 && <td class='other_threehundred'>{Math.round(item["other-stats"][5]["pts-value"] * 100) / 100}</td>}
-                        {status===1 && visible===6 && <td class='other_threehundred'>{Math.round(item["other-stats"][5]["ft-value"] * 100) / 100}</td>}
-                        {status===1 && visible===7 && <td class='other_all'>{Math.round(item["other-stats"][6]["pts-value"] * 100) / 100}</td>}
-                        {status===1 && visible===7 && <td class='other_all'>{Math.round(item["other-stats"][6]["ft-value"] * 100) / 100}</td>}
+                        {status===1 && posStatus===1 && visible===1 && <td class='other_fifty'>{Math.round(item["other-stats"][0]["pts-value"] * 100) / 100}</td>}
+                        {status===1 && posStatus===1 && visible===1 && <td class='other_fifty'>{Math.round(item["other-stats"][0]["ft-value"] * 100) / 100}</td>}
+                        {status===1 && posStatus===1 && visible===2 && <td class='other_hundred'>{Math.round(item["other-stats"][1]["pts-value"] * 100) / 100}</td>}
+                        {status===1 && posStatus===1 && visible===2 && <td class='other_hundred'>{Math.round(item["other-stats"][1]["ft-value"] * 100) / 100}</td>}
+                        {status===1 && posStatus===1 && visible===3 && <td class='other_onetwenty'>{Math.round(item["other-stats"][2]["pts-value"] * 100) / 100}</td>}
+                        {status===1 && posStatus===1 && visible===3 && <td class='other_onetwenty'>{Math.round(item["other-stats"][2]["ft-value"] * 100) / 100}</td>}
+                        {status===1 && posStatus===1 && visible===4 && <td class='other_onefifty'>{Math.round(item["other-stats"][3]["pts-value"] * 100) / 100}</td>}
+                        {status===1 && posStatus===1 && visible===4 && <td class='other_onefifty'>{Math.round(item["other-stats"][3]["ft-value"] * 100) / 100}</td>}
+                        {status===1 && posStatus===1 && visible===5 && <td class='other_twohundred'>{Math.round(item["other-stats"][4]["pts-value"] * 100) / 100}</td>}
+                        {status===1 && posStatus===1 && visible===5 && <td class='other_twohundred'>{Math.round(item["other-stats"][4]["ft-value"] * 100) / 100}</td>}
+                        {status===1 && posStatus===1 && visible===6 && <td class='other_threehundred'>{Math.round(item["other-stats"][5]["pts-value"] * 100) / 100}</td>}
+                        {status===1 && posStatus===1 && visible===6 && <td class='other_threehundred'>{Math.round(item["other-stats"][5]["ft-value"] * 100) / 100}</td>}
+                        {status===1 && posStatus===1 && visible===7 && <td class='other_all'>{Math.round(item["other-stats"][6]["pts-value"] * 100) / 100}</td>}
+                        {status===1 && posStatus===1 && visible===7 && <td class='other_all'>{Math.round(item["other-stats"][6]["ft-value"] * 100) / 100}</td>}
                         {status===1 && posStatus===2 && posVisible===1 && <td class='other_pos_ten'>{Math.round(item["other-stats-pos"][0]["pts-value"] * 100) / 100}</td>}
                         {status===1 && posStatus===2 && posVisible===1 && <td class='other_pos_ten'>{Math.round(item["other-stats-pos"][0]["ft-value"] * 100) / 100}</td>}
                         {status===1 && posStatus===2 && posVisible===2 && <td class='other_pos_twentyfive'>{Math.round(item["other-stats-pos"][1]["pts-value"] * 100) / 100}</td>}
