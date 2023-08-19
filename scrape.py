@@ -45,7 +45,8 @@ year = dateString[0]
 month = dateString[1]
 day = dateString[2]
 
-intDate = date(int(year), int(month), int(day))
+# intDate = date(int(year), int(month), int(day))
+intDate = date(2023, 3, 7)
 tipOff = date(2022, 10, 18)
 lastDay = date(2023, 4, 9)
 if ((intDate - lastDay).days <= 0):
@@ -80,7 +81,7 @@ if ((intDate - lastDay).days <= 0):
         soup = BeautifulSoup(html, 'html.parser')
         return soup
 
-    # retrieves the box score of every single NBA game played in the months given to it.
+    # retrieves the box score from a basketball reference page.
     def scrape_game_links():
         soup = open_page(url)
         linkBoxes = soup.find_all("p", {"class": "links"})
@@ -606,12 +607,12 @@ if ((intDate - lastDay).days <= 0):
         for metric in metrics:
             positional_mean(stat_set, metric) 
 
-    update_st_dev_players()
-    update_z_score_players()
-    update_median_players()
-    update_positional_st_dev()
-    update_positional_z_score()
-    update_other_stats()
-    update_other_stats_pos()
+    #update_st_dev_players()
+    #update_z_score_players()
+    #update_median_players()
+    #update_positional_st_dev()
+    #update_positional_z_score()
+    #update_other_stats()
+    #update_other_stats_pos()
 
     # can calculate coefficient of variance to see what outliers matter more
