@@ -56,9 +56,7 @@ function Calculator() {
     const radioPosHandler = (posStatus) => { 
         setPosStatus(posStatus);
     }
-
-    const [countVisible, toggleVisible] = React.useState(true);
-
+    
     function toggleFunction() {
         console.log("test");
         const rest = document.querySelectorAll(".full");
@@ -584,7 +582,7 @@ function Calculator() {
                 <p><strong>Cap V - </strong> Capped Overall Value. Same as overall value except limits outlier z-scores so individual categories can't overly influence overall value</p>
                 
                 <p class='hding'>Other Stats</p>
-                <p><strong>ScV - </strong>Scoring value. Weights FG% with attempts per game as players with higher attempts influence FT% more</p>
+                <p><strong>ScV - </strong>Scoring value. Weights FG% with attempts per game as players with higher attempts influence FG% more</p>
                 <p><strong>FTV - </strong>Free Throw value. Weights FT% with free throw attempts per game as players with higher attempts influence FT% more</p>
             </div>
         </section>
