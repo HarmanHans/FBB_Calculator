@@ -9,8 +9,11 @@ function Calculator() {
     }, []);
 
     const [items, setItems] = useState([]);
+    const [sort, setSort] = React.useState({location: "['z-value'][3].value", direction: 'desc'});
 
-    const count = 1;
+    var count = 1;
+    const selectLocations = ["['z-value'][0].value", "['z-value'][1].value", "['z-value'][2].value", "['z-value'][3].value", "['z-value'][4].value", "['z-value'][5].value", "['z-value'][6].value"];
+    const selectPosLocations = ["['z-positional_value'][0].value", "['z-positional_value'][1].value", "['z-positional_value'][2].value", "['z-positional_value'][3].value", "['z-positional_value'][4].value", "['z-positional_value'][5].value"];
 
     const fetchItems = async() => {
         const data = await fetch('/calculator');
@@ -19,16 +22,6 @@ function Calculator() {
         const items = oldItems.filter(function (a) {
             return a['season_averages']['games'] > 0;
         });
-
-        items.sort(function(a,b) {
-            return b["z-value"][3].value - a["z-value"][3].value;
-        });
-
-        for (var i=0; i < items.length; i++) {
-            items[i].rank = i + 1;
-        }
-
-        console.log(items);
 
         setItems(items);
     }
@@ -41,30 +34,77 @@ function Calculator() {
 
     const [visible, setVisibility] = React.useState(4);
 
+
     const selectHandler = (visible) => {
         setVisibility(visible);
+        if (posStatus === 1) {
+            handleSelectSort(selectLocations[visible - 1])
+        }
     }
 
     const [posVisible, setPosVisibility] = React.useState(3);
 
     const selectPosHandler = (posVisible) => {
         setPosVisibility(posVisible);
+        if (posStatus === 2) {
+            handleSelectSort(selectPosLocations[posVisible - 1])
+        }
     }
 
     const [posStatus, setPosStatus] = React.useState(1);
 
     const radioPosHandler = (posStatus) => { 
         setPosStatus(posStatus);
+        if (posStatus === 1) {
+            handleSelectSort(selectLocations[visible - 1])
+        } else {
+            handleSelectSort(selectPosLocations[posVisible - 1])
+        }
     }
-    
+
     function toggleFunction() {
-        console.log("test");
         const rest = document.querySelectorAll(".full");
 
         for (let i = 0; i < rest.length; i++) {
             rest[i].classList.toggle('hidden');
         }
     }
+
+    function handleHeaderClick(header) {
+        //count = 1
+        console.log(sort.direction)
+        setSort({
+            location: header,
+            direction: 
+                header === sort.location ? sort.direction === 'asc' ? 'desc' : 'asc' : 'desc',
+        });
+        console.log(sort.direction)
+    }
+
+    function getSortedData(data) {
+        count = 1
+        var sortedData = {}
+        if (sort.direction === 'asc') {
+            sortedData = data.sort((a, b) => (eval('a' + sort.location) > eval('b' + sort.location) ? 1: -1))
+        } else {
+            sortedData = data.sort((a, b) => (eval('a' + sort.location) > eval('b' + sort.location) ? -1: 1))
+        }
+
+        if (sort.location.includes('.value')) {
+            for (var i = 0; i < data.length; i++) {
+                data[i].rank = i + 1;
+            }
+        }
+
+        return sortedData
+    }
+
+    function handleSelectSort(select) {
+        setSort({
+            location: select,
+            direction: 'desc',
+        })
+    } 
 
 
     /*
@@ -152,206 +192,206 @@ function Calculator() {
             <table class='table'>
                 <thead>
                     <th class='header rank'>Rank</th>
-                    <th class='header basic'>Name</th>
+                    <th class='header basic' onClick={() => handleHeaderClick("['name']")}>Name</th>
                     <th class='header basic'>Pos</th>
-                    <th class='header basic'>Games</th>
-                    {status===1 && <th id='ave' class='header season_average'>MPG</th>}
-                    {status===1 && <th id='ave' class='header season_average'>PPG</th>}
-                    {status===1 && <th id='ave' class='header season_average'>3PG</th>}
-                    {status===1 && <th id='ave' class='header season_average'>APG</th>}
-                    {status===1 && <th id='ave' class='header season_average'>RPG</th>}
-                    {status===1 && <th id='ave' class='header season_average'>SPG</th>}
-                    {status===1 && <th id='ave' class='header season_average'>BPG</th>}
-                    {status===1 && <th id='ave' class='header season_average'>FG%</th>}
-                    {status===1 && <th id='ave' class='header season_average'>Att</th>}
-                    {status===1 && <th id='ave' class='header season_average'>FT%</th>}
-                    {status===1 && <th id='ave' class='header season_average'>FT</th>}
-                    {status===1 && <th id='ave' class='header season_average'>TO</th>}
-                    {status===1 && posStatus===1 && visible===1 && <th class='header top_fifty'>PV</th>}
-                    {status===1 && posStatus===1 && visible===1 && <th class='header top_fifty'>3V</th>}
-                    {status===1 && posStatus===1 && visible===1 && <th class='header top_fifty'>AV</th>}
-                    {status===1 && posStatus===1 && visible===1 && <th class='header top_fifty'>RV</th>}
-                    {status===1 && posStatus===1 && visible===1 && <th class='header top_fifty'>SV</th>}
-                    {status===1 && posStatus===1 && visible===1 && <th class='header top_fifty'>BV</th>}
-                    {status===1 && posStatus===1 && visible===1 && <th class='header top_fifty'>FG%V</th>}
-                    {status===1 && posStatus===1 && visible===1 && <th class='header top_fifty'>FT%V</th>}
-                    {status===1 && posStatus===1 && visible===1 && <th class='header top_fifty'>TOV</th>}
-                    {status===1 && posStatus===1 && visible===1 && <th class='header top_fifty'>V</th>}
-                    {status===1 && posStatus===1 && visible===1 && <th class='header top_fifty'>Cap V</th>}
-                    {status===1 && posStatus===1 && visible===2 && <th class='header top_hundred'>PV</th>}
-                    {status===1 && posStatus===1 && visible===2 && <th class='header top_hundred'>3V</th>}
-                    {status===1 && posStatus===1 && visible===2 && <th class='header top_hundred'>AV</th>}
-                    {status===1 && posStatus===1 && visible===2 && <th class='header top_hundred'>RV</th>}
-                    {status===1 && posStatus===1 && visible===2 && <th class='header top_hundred'>SV</th>}
-                    {status===1 && posStatus===1 && visible===2 && <th class='header top_hundred'>BV</th>}
-                    {status===1 && posStatus===1 && visible===2 && <th class='header top_hundred'>FG%V</th>}
-                    {status===1 && posStatus===1 && visible===2 && <th class='header top_hundred'>FT%V</th>}
-                    {status===1 && posStatus===1 && visible===2 && <th class='header top_hundred'>TOV</th>}
-                    {status===1 && posStatus===1 && visible===2 && <th class='header top_hundred'>V</th>}
-                    {status===1 && posStatus===1 && visible===2 && <th class='header top_hundred'>Cap V</th>}
-                    {status===1 && posStatus===1 && visible===3 && <th class='header top_onetwenty'>PV</th>}
-                    {status===1 && posStatus===1 && visible===3 && <th class='header top_onetwenty'>3V</th>}
-                    {status===1 && posStatus===1 && visible===3 && <th class='header top_onetwenty'>AV</th>}
-                    {status===1 && posStatus===1 && visible===3 && <th class='header top_onetwenty'>RV</th>}
-                    {status===1 && posStatus===1 && visible===3 && <th class='header top_onetwenty'>SV</th>}
-                    {status===1 && posStatus===1 && visible===3 && <th class='header top_onetwenty'>BV</th>}
-                    {status===1 && posStatus===1 && visible===3 && <th class='header top_onetwenty'>FG%V</th>}
-                    {status===1 && posStatus===1 && visible===3 && <th class='header top_onetwenty'>FT%V</th>}
-                    {status===1 && posStatus===1 && visible===3 && <th class='header top_onetwenty'>TOV</th>}
-                    {status===1 && posStatus===1 && visible===3 && <th class='header top_onetwenty'>V</th>}
-                    {status===1 && posStatus===1 && visible===3 && <th class='header top_onetwenty'>Cap V</th>}
-                    {status===1 && posStatus===1 && visible===4 && <th class='header top_onefifty'>PV</th>}
-                    {status===1 && posStatus===1 && visible===4 && <th class='header top_onefifty'>3V</th>}
-                    {status===1 && posStatus===1 && visible===4 && <th class='header top_onefifty'>AV</th>}
-                    {status===1 && posStatus===1 && visible===4 && <th class='header top_onefifty'>RV</th>}
-                    {status===1 && posStatus===1 && visible===4 && <th class='header top_onefifty'>SV</th>}
-                    {status===1 && posStatus===1 && visible===4 && <th class='header top_onefifty'>BV</th>}
-                    {status===1 && posStatus===1 && visible===4 && <th class='header top_onefifty'>FG%V</th>}
-                    {status===1 && posStatus===1 && visible===4 && <th class='header top_onefifty'>FT%V</th>}
-                    {status===1 && posStatus===1 && visible===4 && <th class='header top_onefifty'>TOV</th>}
-                    {status===1 && posStatus===1 && visible===4 && <th class='header top_onefifty'>V</th>}
-                    {status===1 && posStatus===1 && visible===4 && <th class='header top_onefifty'>Cap V</th>}
-                    {status===1 && posStatus===1 && visible===5 && <th class='header top_twohundred'>PV</th>}
-                    {status===1 && posStatus===1 && visible===5 && <th class='header top_twohundred'>3V</th>}
-                    {status===1 && posStatus===1 && visible===5 && <th class='header top_twohundred'>AV</th>}
-                    {status===1 && posStatus===1 && visible===5 && <th class='header top_twohundred'>RV</th>}
-                    {status===1 && posStatus===1 && visible===5 && <th class='header top_twohundred'>SV</th>}
-                    {status===1 && posStatus===1 && visible===5 && <th class='header top_twohundred'>BV</th>}
-                    {status===1 && posStatus===1 && visible===5 && <th class='header top_twohundred'>FG%V</th>}
-                    {status===1 && posStatus===1 && visible===5 && <th class='header top_twohundred'>FT%V</th>}
-                    {status===1 && posStatus===1 && visible===5 && <th class='header top_twohundred'>TOV</th>}
-                    {status===1 && posStatus===1 && visible===5 && <th class='header top_twohundred'>V</th>}
-                    {status===1 && posStatus===1 && visible===5 && <th class='header top_twohundred'>Cap V</th>}
-                    {status===1 && posStatus===1 && visible===6 && <th class='header top_threehundred'>PV</th>}
-                    {status===1 && posStatus===1 && visible===6 && <th class='header top_threehundred'>3V</th>}
-                    {status===1 && posStatus===1 && visible===6 && <th class='header top_threehundred'>AV</th>}
-                    {status===1 && posStatus===1 && visible===6 && <th class='header top_threehundred'>RV</th>}
-                    {status===1 && posStatus===1 && visible===6 && <th class='header top_threehundred'>SV</th>}
-                    {status===1 && posStatus===1 && visible===6 && <th class='header top_threehundred'>BV</th>}
-                    {status===1 && posStatus===1 && visible===6 && <th class='header top_threehundred'>FG%V</th>}
-                    {status===1 && posStatus===1 && visible===6 && <th class='header top_threehundred'>FT%V</th>}
-                    {status===1 && posStatus===1 && visible===6 && <th class='header top_threehundred'>TOV</th>}
-                    {status===1 && posStatus===1 && visible===6 && <th class='header top_threehundred'>V</th>}
-                    {status===1 && posStatus===1 && visible===6 && <th class='header top_threehundred'>Cap V</th>}
-                    {status===1 && posStatus===1 && visible===7 && <th class='header top_all'>PV</th>}
-                    {status===1 && posStatus===1 && visible===7 && <th class='header top_all'>3V</th>}
-                    {status===1 && posStatus===1 && visible===7 && <th class='header top_all'>AV</th>}
-                    {status===1 && posStatus===1 && visible===7 && <th class='header top_all'>RV</th>}
-                    {status===1 && posStatus===1 && visible===7 && <th class='header top_all'>SV</th>}
-                    {status===1 && posStatus===1 && visible===7 && <th class='header top_all'>BV</th>}
-                    {status===1 && posStatus===1 && visible===7 && <th class='header top_all'>FG%V</th>}
-                    {status===1 && posStatus===1 && visible===7 && <th class='header top_all'>FT%V</th>}
-                    {status===1 && posStatus===1 && visible===7 && <th class='header top_all'>TOV</th>}
-                    {status===1 && posStatus===1 && visible===7 && <th class='header top_all'>V</th>}
-                    {status===1 && posStatus===1 && visible===7 && <th class='header top_all'>Cap V</th>}
-                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten'>PV</th>}
-                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten'>3V</th>}
-                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten'>AV</th>}
-                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten'>RV</th>}
-                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten'>SV</th>}
-                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten'>BV</th>}
-                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten'>FG%V</th>}
-                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten'>FT%V</th>}
-                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten'>TOV</th>}
-                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten'>V</th>}
-                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten'>Cap V</th>}
-                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive'>PV</th>}
-                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive'>3V</th>}
-                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive'>AV</th>}
-                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive'>RV</th>}
-                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive'>SV</th>}
-                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive'>BV</th>}
-                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive'>FG%V</th>}
-                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive'>FT%V</th>}
-                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive'>TOV</th>}
-                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive'>V</th>}
-                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive'>Cap V</th>}
-                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty'>PV</th>}
-                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty'>3V</th>}
-                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty'>AV</th>}
-                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty'>RV</th>}
-                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty'>SV</th>}
-                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty'>BV</th>}
-                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty'>FG%V</th>}
-                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty'>FT%V</th>}
-                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty'>TOV</th>}
-                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty'>V</th>}
-                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty'>Cap V</th>}
-                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive'>PV</th>}
-                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive'>3V</th>}
-                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive'>AV</th>}
-                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive'>RV</th>}
-                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive'>SV</th>}
-                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive'>BV</th>}
-                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive'>FG%V</th>}
-                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive'>FT%V</th>}
-                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive'>TOV</th>}
-                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive'>V</th>}
-                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive'>Cap V</th>}
-                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred'>PV</th>}
-                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred'>3V</th>}
-                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred'>AV</th>}
-                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred'>RV</th>}
-                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred'>SV</th>}
-                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred'>BV</th>}
-                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred'>FG%V</th>}
-                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred'>FT%V</th>}
-                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred'>TOV</th>}
-                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred'>V</th>}
-                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred'>Cap V</th>}
-                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all'>PV</th>}
-                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all'>3V</th>}
-                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all'>AV</th>}
-                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all'>RV</th>}
-                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all'>SV</th>}
-                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all'>BV</th>}
-                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all'>FG%V</th>}
-                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all'>FT%V</th>}
-                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all'>TOV</th>}
-                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all'>V</th>}
-                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all'>Cap V</th>}
-                    {status===1 && posStatus===1 && visible===1 && <th class='header other_fifty'>ScV</th>}
-                    {status===1 && posStatus===1 && visible===1 && <th class='header other_fifty'>FTV</th>}
-                    {status===1 && posStatus===1 && visible===2 && <th class='header other_hundred'>ScV</th>}
-                    {status===1 && posStatus===1 && visible===2 && <th class='header other_hundred'>FTV</th>}
-                    {status===1 && posStatus===1 && visible===3 && <th class='header other_onetwenty'>ScV</th>}
-                    {status===1 && posStatus===1 && visible===3 && <th class='header other_onetwenty'>FTV</th>}
-                    {status===1 && posStatus===1 && visible===4 && <th class='header other_onefifty'>ScV</th>}
-                    {status===1 && posStatus===1 && visible===4 && <th class='header other_onefifty'>FTV</th>}
-                    {status===1 && posStatus===1 && visible===5 && <th class='header other_twohundred'>ScV</th>}
-                    {status===1 && posStatus===1 && visible===5 && <th class='header other_twohundred'>FTV</th>}
-                    {status===1 && posStatus===1 && visible===6 && <th class='header other_threehundred'>ScV</th>}
-                    {status===1 && posStatus===1 && visible===6 && <th class='header other_threehundred'>FTV</th>}
-                    {status===1 && posStatus===1 && visible===7 && <th class='header other_all'>ScV</th>}
-                    {status===1 && posStatus===1 && visible===7 && <th class='header other_all'>FTV</th>}
-                    {status===1 && posStatus===2 && posVisible===1 && <th class='header other_pos_ten'>ScV</th>}
-                    {status===1 && posStatus===2 && posVisible===1 && <th class='header other_pos_ten'>FTV</th>}
-                    {status===1 && posStatus===2 && posVisible===2 && <th class='header other_pos_twentyfive'>ScV</th>}
-                    {status===1 && posStatus===2 && posVisible===2 && <th class='header other_pos_twentyfive'>FTV</th>}
-                    {status===1 && posStatus===2 && posVisible===3 && <th class='header other_pos_fifty'>ScV</th>}
-                    {status===1 && posStatus===2 && posVisible===3 && <th class='header other_pos_fifty'>FTV</th>}
-                    {status===1 && posStatus===2 && posVisible===4 && <th class='header other_pos_seventyfive'>ScV</th>}
-                    {status===1 && posStatus===2 && posVisible===4 && <th class='header other_pos_seventyfive'>FTV</th>}
-                    {status===1 && posStatus===2 && posVisible===5 && <th class='header other_pos_hundred'>ScV</th>}
-                    {status===1 && posStatus===2 && posVisible===5 && <th class='header other_pos_hundred'>FTV</th>}
-                    {status===1 && posStatus===2 && posVisible===6 && <th class='header other_pos_all'>ScV</th>}
-                    {status===1 && posStatus===2 && posVisible===6 && <th class='header other_pos_all'>FTV</th>}
-                    {status===2 && <th class='header proj'>MPG</th>}
-                    {status===2 && <th class='header proj'>PPG</th>}
-                    {status===2 && <th class='header proj'>3PPG</th>}
-                    {status===2 && <th class='header proj'>APG</th>}
-                    {status===2 && <th class='header proj'>RPG</th>}
-                    {status===2 && <th class='header proj'>SPG</th>}
-                    {status===2 && <th class='header proj'>BPG</th>}
-                    {status===2 && <th class='header proj'>AV FG%</th>}
-                    {status===2 && <th class='header proj'>Att. PG</th>}
-                    {status===2 && <th class='header proj'>AV FT%</th>}
-                    {status===2 && <th class='header proj'>FT Att. PG</th>}
-                    {status===2 && <th class='header proj'>TOPG</th>}
+                    <th class='header basic' onClick={() => handleHeaderClick("['season_averages']['games']")}>Games</th>
+                    {status===1 && <th id='ave' class='header season_average' onClick={() => handleHeaderClick("['season_averages']['minutes']")}>MPG</th>}
+                    {status===1 && <th id='ave' class='header season_average' onClick={() => handleHeaderClick("['season_averages']['pts']")}>PPG</th>}
+                    {status===1 && <th id='ave' class='header season_average' onClick={() => handleHeaderClick("['season_averages']['fg3']")}>3PG</th>}
+                    {status===1 && <th id='ave' class='header season_average' onClick={() => handleHeaderClick("['season_averages']['ast']")}>APG</th>}
+                    {status===1 && <th id='ave' class='header season_average' onClick={() => handleHeaderClick("['season_averages']['reb']")}>RPG</th>}
+                    {status===1 && <th id='ave' class='header season_average' onClick={() => handleHeaderClick("['season_averages']['stl']")}>SPG</th>}
+                    {status===1 && <th id='ave' class='header season_average' onClick={() => handleHeaderClick("['season_averages']['blk']")}>BPG</th>}
+                    {status===1 && <th id='ave' class='header season_average' onClick={() => handleHeaderClick("['season_averages']['fg_pct']")}>FG%</th>}
+                    {status===1 && <th id='ave' class='header season_average' onClick={() => handleHeaderClick("['season_averages']['attempts']")}>Att</th>}
+                    {status===1 && <th id='ave' class='header season_average' onClick={() => handleHeaderClick("['season_averages']['ft_pct']")}>FT%</th>}
+                    {status===1 && <th id='ave' class='header season_average' onClick={() => handleHeaderClick("['season_averages']['ft']")}>FT</th>}
+                    {status===1 && <th id='ave' class='header season_average' onClick={() => handleHeaderClick("['season_averages']['turnovers']")}>TO</th>}
+                    {status===1 && posStatus===1 && visible===1 && <th class='header top_fifty' onClick={() => handleHeaderClick("['z-value']['0']['pts']")}>PV</th>}
+                    {status===1 && posStatus===1 && visible===1 && <th class='header top_fifty' onClick={() => handleHeaderClick("['z-value']['0']['fg3']")}>3V</th>}
+                    {status===1 && posStatus===1 && visible===1 && <th class='header top_fifty' onClick={() => handleHeaderClick("['z-value']['0']['ast']")}>AV</th>}
+                    {status===1 && posStatus===1 && visible===1 && <th class='header top_fifty' onClick={() => handleHeaderClick("['z-value']['0']['reb']")}>RV</th>}
+                    {status===1 && posStatus===1 && visible===1 && <th class='header top_fifty' onClick={() => handleHeaderClick("['z-value']['0']['stl']")}>SV</th>}
+                    {status===1 && posStatus===1 && visible===1 && <th class='header top_fifty' onClick={() => handleHeaderClick("['z-value']['0']['blk']")}>BV</th>}
+                    {status===1 && posStatus===1 && visible===1 && <th class='header top_fifty' onClick={() => handleHeaderClick("['z-value']['0']['fg_pct']")}>FG%V</th>}
+                    {status===1 && posStatus===1 && visible===1 && <th class='header top_fifty' onClick={() => handleHeaderClick("['z-value']['0']['ft_pct']")}>FT%V</th>}
+                    {status===1 && posStatus===1 && visible===1 && <th class='header top_fifty' onClick={() => handleHeaderClick("['z-value']['0']['turnovers']")}>TOV</th>}
+                    {status===1 && posStatus===1 && visible===1 && <th class='header top_fifty' onClick={() => handleHeaderClick("['z-value']['0']['value']")}>V</th>}
+                    {status===1 && posStatus===1 && visible===1 && <th class='header top_fifty' onClick={() => handleHeaderClick("['z-value']['0']['capped_value']")}>Cap V</th>}
+                    {status===1 && posStatus===1 && visible===2 && <th class='header top_hundred' onClick={() => handleHeaderClick("['z-value']['1']['pts']")}>PV</th>}
+                    {status===1 && posStatus===1 && visible===2 && <th class='header top_hundred' onClick={() => handleHeaderClick("['z-value']['1']['fg3']")}>3V</th>}
+                    {status===1 && posStatus===1 && visible===2 && <th class='header top_hundred' onClick={() => handleHeaderClick("['z-value']['1']['ast']")}>AV</th>}
+                    {status===1 && posStatus===1 && visible===2 && <th class='header top_hundred' onClick={() => handleHeaderClick("['z-value']['1']['reb']")}>RV</th>}
+                    {status===1 && posStatus===1 && visible===2 && <th class='header top_hundred' onClick={() => handleHeaderClick("['z-value']['1']['stl']")}>SV</th>}
+                    {status===1 && posStatus===1 && visible===2 && <th class='header top_hundred' onClick={() => handleHeaderClick("['z-value']['1']['blk']")}>BV</th>}
+                    {status===1 && posStatus===1 && visible===2 && <th class='header top_hundred' onClick={() => handleHeaderClick("['z-value']['1']['fg_pct']")}>FG%V</th>}
+                    {status===1 && posStatus===1 && visible===2 && <th class='header top_hundred' onClick={() => handleHeaderClick("['z-value']['1']['ft_pct']")}>FT%V</th>}
+                    {status===1 && posStatus===1 && visible===2 && <th class='header top_hundred' onClick={() => handleHeaderClick("['z-value']['1']['turnovers']")}>TOV</th>}
+                    {status===1 && posStatus===1 && visible===2 && <th class='header top_hundred' onClick={() => handleHeaderClick("['z-value']['1']['value']")}>V</th>}
+                    {status===1 && posStatus===1 && visible===2 && <th class='header top_hundred' onClick={() => handleHeaderClick("['z-value']['1']['capped_value']")}>Cap V</th>}
+                    {status===1 && posStatus===1 && visible===3 && <th class='header top_onetwenty' onClick={() => handleHeaderClick("['z-value']['2']['pts']")}>PV</th>}
+                    {status===1 && posStatus===1 && visible===3 && <th class='header top_onetwenty' onClick={() => handleHeaderClick("['z-value']['2']['fg3']")}>3V</th>}
+                    {status===1 && posStatus===1 && visible===3 && <th class='header top_onetwenty' onClick={() => handleHeaderClick("['z-value']['2']['ast']")}>AV</th>}
+                    {status===1 && posStatus===1 && visible===3 && <th class='header top_onetwenty' onClick={() => handleHeaderClick("['z-value']['2']['reb']")}>RV</th>}
+                    {status===1 && posStatus===1 && visible===3 && <th class='header top_onetwenty' onClick={() => handleHeaderClick("['z-value']['2']['stl']")}>SV</th>}
+                    {status===1 && posStatus===1 && visible===3 && <th class='header top_onetwenty' onClick={() => handleHeaderClick("['z-value']['2']['blk']")}>BV</th>}
+                    {status===1 && posStatus===1 && visible===3 && <th class='header top_onetwenty' onClick={() => handleHeaderClick("['z-value']['2']['fg_pct']")}>FG%V</th>}
+                    {status===1 && posStatus===1 && visible===3 && <th class='header top_onetwenty' onClick={() => handleHeaderClick("['z-value']['2']['ft_pct']")}>FT%V</th>}
+                    {status===1 && posStatus===1 && visible===3 && <th class='header top_onetwenty' onClick={() => handleHeaderClick("['z-value']['2']['turnovers']")}>TOV</th>}
+                    {status===1 && posStatus===1 && visible===3 && <th class='header top_onetwenty' onClick={() => handleHeaderClick("['z-value']['2']['value']")}>V</th>}
+                    {status===1 && posStatus===1 && visible===3 && <th class='header top_onetwenty' onClick={() => handleHeaderClick("['z-value']['2']['capped_value']")}>Cap V</th>}
+                    {status===1 && posStatus===1 && visible===4 && <th class='header top_onefifty' onClick={() => handleHeaderClick("['z-value']['3']['pts']")}>PV</th>}
+                    {status===1 && posStatus===1 && visible===4 && <th class='header top_onefifty' onClick={() => handleHeaderClick("['z-value']['3']['fg3']")}>3V</th>}
+                    {status===1 && posStatus===1 && visible===4 && <th class='header top_onefifty' onClick={() => handleHeaderClick("['z-value']['3']['ast']")}>AV</th>}
+                    {status===1 && posStatus===1 && visible===4 && <th class='header top_onefifty' onClick={() => handleHeaderClick("['z-value']['3']['reb']")}>RV</th>}
+                    {status===1 && posStatus===1 && visible===4 && <th class='header top_onefifty' onClick={() => handleHeaderClick("['z-value']['3']['stl']")}>SV</th>}
+                    {status===1 && posStatus===1 && visible===4 && <th class='header top_onefifty' onClick={() => handleHeaderClick("['z-value']['3']['blk']")}>BV</th>}
+                    {status===1 && posStatus===1 && visible===4 && <th class='header top_onefifty' onClick={() => handleHeaderClick("['z-value']['3']['fg_pct']")}>FG%V</th>}
+                    {status===1 && posStatus===1 && visible===4 && <th class='header top_onefifty' onClick={() => handleHeaderClick("['z-value']['3']['ft_pct']")}>FT%V</th>}
+                    {status===1 && posStatus===1 && visible===4 && <th class='header top_onefifty' onClick={() => handleHeaderClick("['z-value']['3']['turnovers']")}>TOV</th>}
+                    {status===1 && posStatus===1 && visible===4 && <th class='header top_onefifty' onClick={() => handleHeaderClick("['z-value']['3']['value']")}>V</th>}
+                    {status===1 && posStatus===1 && visible===4 && <th class='header top_onefifty' onClick={() => handleHeaderClick("['z-value']['3']['capped_value']")}>Cap V</th>}
+                    {status===1 && posStatus===1 && visible===5 && <th class='header top_twohundred' onClick={() => handleHeaderClick("['z-value']['4']['pts']")}>PV</th>}
+                    {status===1 && posStatus===1 && visible===5 && <th class='header top_twohundred' onClick={() => handleHeaderClick("['z-value']['4']['fg3']")}>3V</th>}
+                    {status===1 && posStatus===1 && visible===5 && <th class='header top_twohundred' onClick={() => handleHeaderClick("['z-value']['4']['ast']")}>AV</th>}
+                    {status===1 && posStatus===1 && visible===5 && <th class='header top_twohundred' onClick={() => handleHeaderClick("['z-value']['4']['reb']")}>RV</th>}
+                    {status===1 && posStatus===1 && visible===5 && <th class='header top_twohundred' onClick={() => handleHeaderClick("['z-value']['4']['stl']")}>SV</th>}
+                    {status===1 && posStatus===1 && visible===5 && <th class='header top_twohundred' onClick={() => handleHeaderClick("['z-value']['4']['blk']")}>BV</th>}
+                    {status===1 && posStatus===1 && visible===5 && <th class='header top_twohundred' onClick={() => handleHeaderClick("['z-value']['4']['fg_pct']")}>FG%V</th>}
+                    {status===1 && posStatus===1 && visible===5 && <th class='header top_twohundred' onClick={() => handleHeaderClick("['z-value']['4']['ft_pct']")}>FT%V</th>}
+                    {status===1 && posStatus===1 && visible===5 && <th class='header top_twohundred' onClick={() => handleHeaderClick("['z-value']['4']['turnovers']")}>TOV</th>}
+                    {status===1 && posStatus===1 && visible===5 && <th class='header top_twohundred' onClick={() => handleHeaderClick("['z-value']['4']['value']")}>V</th>}
+                    {status===1 && posStatus===1 && visible===5 && <th class='header top_twohundred' onClick={() => handleHeaderClick("['z-value']['4']['capped_value']")}>Cap V</th>}
+                    {status===1 && posStatus===1 && visible===6 && <th class='header top_threehundred' onClick={() => handleHeaderClick("['z-value']['5']['pts']")}>PV</th>}
+                    {status===1 && posStatus===1 && visible===6 && <th class='header top_threehundred' onClick={() => handleHeaderClick("['z-value']['5']['fg3']")}>3V</th>}
+                    {status===1 && posStatus===1 && visible===6 && <th class='header top_threehundred' onClick={() => handleHeaderClick("['z-value']['5']['ast']")}>AV</th>}
+                    {status===1 && posStatus===1 && visible===6 && <th class='header top_threehundred' onClick={() => handleHeaderClick("['z-value']['5']['reb']")}>RV</th>}
+                    {status===1 && posStatus===1 && visible===6 && <th class='header top_threehundred' onClick={() => handleHeaderClick("['z-value']['5']['stl']")}>SV</th>}
+                    {status===1 && posStatus===1 && visible===6 && <th class='header top_threehundred' onClick={() => handleHeaderClick("['z-value']['5']['blk']")}>BV</th>}
+                    {status===1 && posStatus===1 && visible===6 && <th class='header top_threehundred' onClick={() => handleHeaderClick("['z-value']['5']['fg_pct']")}>FG%V</th>}
+                    {status===1 && posStatus===1 && visible===6 && <th class='header top_threehundred' onClick={() => handleHeaderClick("['z-value']['5']['ft_pct']")}>FT%V</th>}
+                    {status===1 && posStatus===1 && visible===6 && <th class='header top_threehundred' onClick={() => handleHeaderClick("['z-value']['5']['turnovers']")}>TOV</th>}
+                    {status===1 && posStatus===1 && visible===6 && <th class='header top_threehundred' onClick={() => handleHeaderClick("['z-value']['5']['value']")}>V</th>}
+                    {status===1 && posStatus===1 && visible===6 && <th class='header top_threehundred' onClick={() => handleHeaderClick("['z-value']['5']['capped_value']")}>Cap V</th>}
+                    {status===1 && posStatus===1 && visible===7 && <th class='header top_all' onClick={() => handleHeaderClick("['z-value']['6']['pts']")}>PV</th>}
+                    {status===1 && posStatus===1 && visible===7 && <th class='header top_all' onClick={() => handleHeaderClick("['z-value']['6']['fg3']")}>3V</th>}
+                    {status===1 && posStatus===1 && visible===7 && <th class='header top_all' onClick={() => handleHeaderClick("['z-value']['6']['ast']")}>AV</th>}
+                    {status===1 && posStatus===1 && visible===7 && <th class='header top_all' onClick={() => handleHeaderClick("['z-value']['6']['reb']")}>RV</th>}
+                    {status===1 && posStatus===1 && visible===7 && <th class='header top_all' onClick={() => handleHeaderClick("['z-value']['6']['stl']")}>SV</th>}
+                    {status===1 && posStatus===1 && visible===7 && <th class='header top_all' onClick={() => handleHeaderClick("['z-value']['6']['blk']")}>BV</th>}
+                    {status===1 && posStatus===1 && visible===7 && <th class='header top_all' onClick={() => handleHeaderClick("['z-value']['6']['fg_pct']")}>FG%V</th>}
+                    {status===1 && posStatus===1 && visible===7 && <th class='header top_all' onClick={() => handleHeaderClick("['z-value']['6']['ft_pct']")}>FT%V</th>}
+                    {status===1 && posStatus===1 && visible===7 && <th class='header top_all' onClick={() => handleHeaderClick("['z-value']['6']['turnovers']")}>TOV</th>}
+                    {status===1 && posStatus===1 && visible===7 && <th class='header top_all' onClick={() => handleHeaderClick("['z-value']['6']['value']")}>V</th>}
+                    {status===1 && posStatus===1 && visible===7 && <th class='header top_all' onClick={() => handleHeaderClick("['z-value']['6']['capped_value']")}>Cap V</th>}
+                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten' onClick={() => handleHeaderClick("['z-positional_value']['0']['pts']")}>PV</th>}
+                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten' onClick={() => handleHeaderClick("['z-positional_value']['0']['fg3']")}>3V</th>}
+                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten' onClick={() => handleHeaderClick("['z-positional_value']['0']['ast']")}>AV</th>}
+                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten' onClick={() => handleHeaderClick("['z-positional_value']['0']['reb']")}>RV</th>}
+                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten' onClick={() => handleHeaderClick("['z-positional_value']['0']['stl']")}>SV</th>}
+                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten' onClick={() => handleHeaderClick("['z-positional_value']['0']['blk']")}>BV</th>}
+                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten' onClick={() => handleHeaderClick("['z-positional_value']['0']['fg_pct']")}>FG%V</th>}
+                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten' onClick={() => handleHeaderClick("['z-positional_value']['0']['ft_pct']")}>FT%V</th>}
+                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten' onClick={() => handleHeaderClick("['z-positional_value']['0']['turnovers']")}>TOV</th>}
+                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten' onClick={() => handleHeaderClick("['z-positional_value']['0']['value']")}>V</th>}
+                    {status===1 && posStatus===2 && posVisible===1 && <th class='header top_pos_ten' onClick={() => handleHeaderClick("['z-positional_value']['0']['capped_value']")}>Cap V</th>}
+                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive' onClick={() => handleHeaderClick("['z-positional_value']['1']['pts']")}>PV</th>}
+                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive' onClick={() => handleHeaderClick("['z-positional_value']['1']['fg3']")}>3V</th>}
+                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive' onClick={() => handleHeaderClick("['z-positional_value']['1']['ast']")}>AV</th>}
+                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive' onClick={() => handleHeaderClick("['z-positional_value']['1']['reb']")}>RV</th>}
+                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive' onClick={() => handleHeaderClick("['z-positional_value']['1']['stl']")}>SV</th>}
+                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive' onClick={() => handleHeaderClick("['z-positional_value']['1']['blk']")}>BV</th>}
+                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive' onClick={() => handleHeaderClick("['z-positional_value']['1']['fg_pct']")}>FG%V</th>}
+                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive' onClick={() => handleHeaderClick("['z-positional_value']['1']['ft_pct']")}>FT%V</th>}
+                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive' onClick={() => handleHeaderClick("['z-positional_value']['1']['turnovers']")}>TOV</th>}
+                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive' onClick={() => handleHeaderClick("['z-positional_value']['1']['value']")}>V</th>}
+                    {status===1 && posStatus===2 && posVisible===2 && <th class='header top_pos_twentyfive' onClick={() => handleHeaderClick("['z-positional_value']['1']['capped_value']")}>Cap V</th>}
+                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty' onClick={() => handleHeaderClick("['z-positional_value']['2']['pts']")}>PV</th>}
+                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty' onClick={() => handleHeaderClick("['z-positional_value']['2']['fg3']")}>3V</th>}
+                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty' onClick={() => handleHeaderClick("['z-positional_value']['2']['ast']")}>AV</th>}
+                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty' onClick={() => handleHeaderClick("['z-positional_value']['2']['reb']")}>RV</th>}
+                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty' onClick={() => handleHeaderClick("['z-positional_value']['2']['stl']")}>SV</th>}
+                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty' onClick={() => handleHeaderClick("['z-positional_value']['2']['blk']")}>BV</th>}
+                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty' onClick={() => handleHeaderClick("['z-positional_value']['2']['fg_pct']")}>FG%V</th>}
+                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty' onClick={() => handleHeaderClick("['z-positional_value']['2']['ft_pct']")}>FT%V</th>}
+                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty' onClick={() => handleHeaderClick("['z-positional_value']['2']['turnovers']")}>TOV</th>}
+                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty' onClick={() => handleHeaderClick("['z-positional_value']['2']['value']")}>V</th>}
+                    {status===1 && posStatus===2 && posVisible===3 && <th class='header top_pos_fifty' onClick={() => handleHeaderClick("['z-positional_value']['2']['capped_value']")}>Cap V</th>}
+                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive' onClick={() => handleHeaderClick("['z-positional_value']['3']['pts']")}>PV</th>}
+                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive' onClick={() => handleHeaderClick("['z-positional_value']['3']['fg3']")}>3V</th>}
+                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive' onClick={() => handleHeaderClick("['z-positional_value']['3']['ast']")}>AV</th>}
+                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive' onClick={() => handleHeaderClick("['z-positional_value']['3']['reb']")}>RV</th>}
+                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive' onClick={() => handleHeaderClick("['z-positional_value']['3']['stl']")}>SV</th>}
+                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive' onClick={() => handleHeaderClick("['z-positional_value']['3']['blk']")}>BV</th>}
+                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive' onClick={() => handleHeaderClick("['z-positional_value']['3']['fg_pct']")}>FG%V</th>}
+                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive' onClick={() => handleHeaderClick("['z-positional_value']['3']['ft_pct']")}>FT%V</th>}
+                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive' onClick={() => handleHeaderClick("['z-positional_value']['3']['turnovers']")}>TOV</th>}
+                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive' onClick={() => handleHeaderClick("['z-positional_value']['3']['value']")}>V</th>}
+                    {status===1 && posStatus===2 && posVisible===4 && <th class='header top_pos_seventyfive' onClick={() => handleHeaderClick("['z-positional_value']['3']['capped_value']")}>Cap V</th>}
+                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred' onClick={() => handleHeaderClick("['z-positional_value']['4']['pts']")}>PV</th>}
+                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred' onClick={() => handleHeaderClick("['z-positional_value']['4']['fg3']")}>3V</th>}
+                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred' onClick={() => handleHeaderClick("['z-positional_value']['4']['ast']")}>AV</th>}
+                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred' onClick={() => handleHeaderClick("['z-positional_value']['4']['reb']")}>RV</th>}
+                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred' onClick={() => handleHeaderClick("['z-positional_value']['4']['stl']")}>SV</th>}
+                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred' onClick={() => handleHeaderClick("['z-positional_value']['4']['blk']")}>BV</th>}
+                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred' onClick={() => handleHeaderClick("['z-positional_value']['4']['fg_pct']")}>FG%V</th>}
+                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred' onClick={() => handleHeaderClick("['z-positional_value']['4']['ft_pct']")}>FT%V</th>}
+                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred' onClick={() => handleHeaderClick("['z-positional_value']['4']['turnovers']")}>TOV</th>}
+                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred' onClick={() => handleHeaderClick("['z-positional_value']['4']['value']")}>V</th>}
+                    {status===1 && posStatus===2 && posVisible===5 && <th class='header top_pos_hundred' onClick={() => handleHeaderClick("['z-positional_value']['4']['capped_value']")}>Cap V</th>}
+                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all' onClick={() => handleHeaderClick("['z-positional_value']['5']['pts']")}>PV</th>}
+                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all' onClick={() => handleHeaderClick("['z-positional_value']['5']['fg3']")}>3V</th>}
+                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all' onClick={() => handleHeaderClick("['z-positional_value']['5']['ast']")}>AV</th>}
+                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all' onClick={() => handleHeaderClick("['z-positional_value']['5']['reb']")}>RV</th>}
+                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all' onClick={() => handleHeaderClick("['z-positional_value']['5']['stl']")}>SV</th>}
+                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all' onClick={() => handleHeaderClick("['z-positional_value']['5']['blk']")}>BV</th>}
+                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all' onClick={() => handleHeaderClick("['z-positional_value']['5']['fg_pct']")}>FG%V</th>}
+                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all' onClick={() => handleHeaderClick("['z-positional_value']['5']['ft_pct']")}>FT%V</th>}
+                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all' onClick={() => handleHeaderClick("['z-positional_value']['5']['turnovers']")}>TOV</th>}
+                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all' onClick={() => handleHeaderClick("['z-positional_value']['5']['value']")}>V</th>}
+                    {status===1 && posStatus===2 && posVisible===6 && <th class='header top_pos_all' onClick={() => handleHeaderClick("['z-positional_value']['5']['capped_value']")}>Cap V</th>}
+                    {status===1 && posStatus===1 && visible===1 && <th class='header other_fifty' onClick={() => handleHeaderClick("['other-stats']['0']['pts-value']")}>ScV</th>}
+                    {status===1 && posStatus===1 && visible===1 && <th class='header other_fifty' onClick={() => handleHeaderClick("['other-stats']['0']['ft-value']")}>FTV</th>}
+                    {status===1 && posStatus===1 && visible===2 && <th class='header other_hundred' onClick={() => handleHeaderClick("['other-stats']['1']['pts-value']")}>ScV</th>}
+                    {status===1 && posStatus===1 && visible===2 && <th class='header other_hundred' onClick={() => handleHeaderClick("['other-stats']['1']['ft-value']")}>FTV</th>}
+                    {status===1 && posStatus===1 && visible===3 && <th class='header other_onetwenty' onClick={() => handleHeaderClick("['other-stats']['2']['pts-value']")}>ScV</th>}
+                    {status===1 && posStatus===1 && visible===3 && <th class='header other_onetwenty' onClick={() => handleHeaderClick("['other-stats']['2']['ft-value']")}>FTV</th>}
+                    {status===1 && posStatus===1 && visible===4 && <th class='header other_onefifty' onClick={() => handleHeaderClick("['other-stats']['3']['pts-value']")}>ScV</th>}
+                    {status===1 && posStatus===1 && visible===4 && <th class='header other_onefifty' onClick={() => handleHeaderClick("['other-stats']['3']['ft-value']")}>FTV</th>}
+                    {status===1 && posStatus===1 && visible===5 && <th class='header other_twohundred' onClick={() => handleHeaderClick("['other-stats']['4']['pts-value']")}>ScV</th>}
+                    {status===1 && posStatus===1 && visible===5 && <th class='header other_twohundred' onClick={() => handleHeaderClick("['other-stats']['4']['ft-value']")}>FTV</th>}
+                    {status===1 && posStatus===1 && visible===6 && <th class='header other_threehundred' onClick={() => handleHeaderClick("['other-stats']['5']['pts-value']")}>ScV</th>}
+                    {status===1 && posStatus===1 && visible===6 && <th class='header other_threehundred' onClick={() => handleHeaderClick("['other-stats']['5']['ft-value']")}>FTV</th>}
+                    {status===1 && posStatus===1 && visible===7 && <th class='header other_all' onClick={() => handleHeaderClick("['other-stats']['6']['pts-value']")}>ScV</th>}
+                    {status===1 && posStatus===1 && visible===7 && <th class='header other_all' onClick={() => handleHeaderClick("['other-stats']['6']['ft-value']")}>FTV</th>}
+                    {status===1 && posStatus===2 && posVisible===1 && <th class='header other_pos_ten' onClick={() => handleHeaderClick("['other-stats-pos']['0']['pts-value']")}>ScV</th>}
+                    {status===1 && posStatus===2 && posVisible===1 && <th class='header other_pos_ten' onClick={() => handleHeaderClick("['other-stats-pos']['0']['ft-value']")}>FTV</th>}
+                    {status===1 && posStatus===2 && posVisible===2 && <th class='header other_pos_twentyfive' onClick={() => handleHeaderClick("['other-stats-pos']['1']['pts-value']")}>ScV</th>}
+                    {status===1 && posStatus===2 && posVisible===2 && <th class='header other_pos_twentyfive' onClick={() => handleHeaderClick("['other-stats-pos']['1']['ft-value']")}>FTV</th>}
+                    {status===1 && posStatus===2 && posVisible===3 && <th class='header other_pos_fifty' onClick={() => handleHeaderClick("['other-stats-pos']['2']['pts-value']")}>ScV</th>}
+                    {status===1 && posStatus===2 && posVisible===3 && <th class='header other_pos_fifty' onClick={() => handleHeaderClick("['other-stats-pos']['2']['ft-value']")}>FTV</th>}
+                    {status===1 && posStatus===2 && posVisible===4 && <th class='header other_pos_seventyfive' onClick={() => handleHeaderClick("['other-stats-pos']['3']['pts-value']")}>ScV</th>}
+                    {status===1 && posStatus===2 && posVisible===4 && <th class='header other_pos_seventyfive' onClick={() => handleHeaderClick("['other-stats-pos']['3']['ft-value']")}>FTV</th>}
+                    {status===1 && posStatus===2 && posVisible===5 && <th class='header other_pos_hundred' onClick={() => handleHeaderClick("['other-stats-pos']['4']['pts-value']")}>ScV</th>}
+                    {status===1 && posStatus===2 && posVisible===5 && <th class='header other_pos_hundred' onClick={() => handleHeaderClick("['other-stats-pos']['4']['ft-value']")}>FTV</th>}
+                    {status===1 && posStatus===2 && posVisible===6 && <th class='header other_pos_all' onClick={() => handleHeaderClick("['other-stats-pos']['5']['pts-value']")}>ScV</th>}
+                    {status===1 && posStatus===2 && posVisible===6 && <th class='header other_pos_all' onClick={() => handleHeaderClick("['other-stats-pos']['5']['ft-value']")}>FTV</th>}
+                    {status===2 && <th class='header proj' onClick={() => handleHeaderClick("['projections']['minutes']")}>MPG</th>}
+                    {status===2 && <th class='header proj' onClick={() => handleHeaderClick("['projections']['pts']")}>PPG</th>}
+                    {status===2 && <th class='header proj' onClick={() => handleHeaderClick("['projections']['fg3']")}>3PPG</th>}
+                    {status===2 && <th class='header proj' onClick={() => handleHeaderClick("['projections']['ast']")}>APG</th>}
+                    {status===2 && <th class='header proj' onClick={() => handleHeaderClick("['projections']['reb']")}>RPG</th>}
+                    {status===2 && <th class='header proj' onClick={() => handleHeaderClick("['projections']['stl']")}>SPG</th>}
+                    {status===2 && <th class='header proj' onClick={() => handleHeaderClick("['projections']['blk']")}>BPG</th>}
+                    {status===2 && <th class='header proj' onClick={() => handleHeaderClick("['projections']['fg_pct']")}>AV FG%</th>}
+                    {status===2 && <th class='header proj' onClick={() => handleHeaderClick("['projections']['attempts']")}>Att. PG</th>}
+                    {status===2 && <th class='header proj' onClick={() => handleHeaderClick("['projections']['ft_pct']")}>AV FT%</th>}
+                    {status===2 && <th class='header proj' onClick={() => handleHeaderClick("['projections']['ft_attempts']")}>FT Att. PG</th>}
+                    {status===2 && <th class='header proj' onClick={() => handleHeaderClick("['projections']['turnovers']")}>TOPG</th>}
                 </thead>
             {
-                items.map(item => (
-                    <tr key={item.name} id={item.pos[0]} class={item.rank > 175 ? 'full hidden' : 'short'}>
+                getSortedData(items).map(item => (
+                    <tr key={item.name} class={item.rank > 175 ? 'full hidden' : 'short'}>
                         <td class='rank'>{item.rank}</td>
                         <td class='basic name'>{item.name}</td>
                         <td class='basic' id = {item.pos[0]}>{item.pos[0]}</td>
@@ -584,6 +624,7 @@ function Calculator() {
                 <p class='hding'>Other Stats</p>
                 <p><strong>ScV - </strong>Scoring value. Weights FG% with attempts per game as players with higher attempts influence FG% more</p>
                 <p><strong>FTV - </strong>Free Throw value. Weights FT% with free throw attempts per game as players with higher attempts influence FT% more</p>
+                <p><strong>Rank - </strong>Player's placement in overall value based on data settings</p>
             </div>
         </section>
     );
