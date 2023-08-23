@@ -19,7 +19,8 @@ function Analysis() {
 
             <h2>Evaluation</h2>
 
-            <img src="../../assets/top20.png" alt="Top 20 Rated Players"></img>
+            <img src='../frotend/assets/toptwenty' alt="Top 20 Rated Players"></img>
+            
             <p>Of the top 20 players measured by this tool (relative to the top 150 players), 14 of them are being drafted in the Top 20 this upcoming year according to Yahoo.
                Fred Van Vleet narrowly misses out, being drafted at an average spot of 20.9. Players like Kawhi Leonard and Paul George miss out due to their extensive injury histories,
                something that a z-score cumulation of their contribution to categories doesn't account for. 

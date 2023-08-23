@@ -91,6 +91,7 @@ fieldset {
   background: rgb(237,87,87);
   border: 1px solid #000;
   color: white;
+  cursor: pointer;
 }
 
 .green {
@@ -106,9 +107,15 @@ fieldset {
   padding: 8px;
 }
 
+/*
 .table tr:nth-child(even) {
     background-color: #f2f2f2;
-}
+} */
+
+/*
+#even {
+  background-color: #f2f2f2;
+}*/
 
 .table td:hover {
     background-color: #ddd;
@@ -122,7 +129,7 @@ fieldset {
   min-width: 145px;
 }
 
-.hidden {
+.hidden, .increment {
   display: none;
 }
 
