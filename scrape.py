@@ -10,15 +10,18 @@ import pymongo
 from pymongo import MongoClient
 from dotenv import load_dotenv
 import chromedriver_autoinstaller as chromedriver
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service
 from unidecode import unidecode
-#from selenium.webdriver.chrome.service import Service as ChromiumService
+from selenium.webdriver.chrome.service import Service as ChromiumService
 #from webdriver_manager.chrome import ChromeDriverManager
-#from webdriver_manager.core.utils import ChromeType
+from webdriver_manager.core.utils import ChromeType
 #import pandas as pd
 import requests
 import urllib.request
 
-chromedriver.install()
+#chromedriver.install()
+#service = Service()
 
 # needs to be until the last day of the NBA regular season
 links = []
@@ -39,14 +42,20 @@ OUTLIER_LIMIT = 2
 
 load_dotenv()
 
-currentDay = str(date.today() - timedelta(days = 2))
-dateString = currentDay.split("-")
+#currentDay = str(date.today() - timedelta(days = 2))
+#dateString = currentDay.split("-")
+#year = dateString[0]
+#month = dateString[1]
+#day = dateString[2]
+
+# intDate = date(int(year), int(month), int(day))
+intDate = date(2022, 10, 19)
+scrape = str(date(2023, 3, 7))
+print(intDate)
+dateString = scrape.split("-")
 year = dateString[0]
 month = dateString[1]
 day = dateString[2]
-
-# intDate = date(int(year), int(month), int(day))
-intDate = date(2023, 3, 7)
 tipOff = date(2022, 10, 18)
 lastDay = date(2023, 4, 9)
 if ((intDate - lastDay).days <= 0):
@@ -69,9 +78,10 @@ if ((intDate - lastDay).days <= 0):
         chrome_options.add_argument("--headless")
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_experimental_option('extensionLoadTimeout', 60000)
-        #chrome_service = ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()
-        #browser = webdriver.Chrome(options=chrome_options)
-        browser = webdriver.Chrome()
+        chrome_service = ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()
+        browser = webdriver.Chrome(service=chrome_service, options=chrome_options)
+        #browser = webdriver.Chrome()
+        #browser = webdriver.Chrome(service=Service(ChromeDriverManager(version='114.0.5735.90').install()),options=chrome_options)
         print(url)
         browser.get(url)
         #html = requests.get(url, timeout=(3.05, 27)).text
@@ -451,9 +461,9 @@ if ((intDate - lastDay).days <= 0):
                             if (mean_set['filter'] == comp['key']):
                                 for key in mean_set:
                                     if (key != '_id' and key != 'key' and key != 'games' and key != 'filter'):
-                                        #if (key == 'turnovers'):
-                                        #    comp[key] = mean_set[key] - item['season_averages'][key]
-                                        #else:
+                                        if (key == 'turnovers'):
+                                            comp[key] = mean_set[key] - item['season_averages'][key]
+                                        else:
                                             comp[key] = item['season_averages'][key] - mean_set[key]
                     for dev_set in st_dev_positions:
                         if(dev_set['key'] == comp['pos'] and dev_set['filter'] < 301 and dev_set['filter'] == comp['key']):
