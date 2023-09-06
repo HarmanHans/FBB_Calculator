@@ -18,7 +18,7 @@ function Calculator() {
 
     const fetchItems = async() => {
         console.log("here");
-        const data = await fetch('/calculator');
+        const data = await fetch('https://fbbvaluecalculator.onrender.com/calculator');
         console.log(data);
         const oldItems = await data.json();
 
