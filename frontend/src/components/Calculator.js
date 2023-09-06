@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
 // import {useTable} from 'react-table';
 import '../Table.css';
+const BASE_URL = process.env.BASE_URL ;
 
 function Calculator() {
     useEffect( () => {
@@ -72,13 +73,11 @@ function Calculator() {
 
     function handleHeaderClick(header) {
         //count = 1
-        console.log(sort.direction)
         setSort({
             location: header,
             direction: 
                 header === sort.location ? sort.direction === 'asc' ? 'desc' : 'asc' : 'desc',
         });
-        console.log(sort.direction)
     }
 
     function getSortedData(data) {
