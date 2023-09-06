@@ -17,7 +17,9 @@ function Calculator() {
     const selectPosLocations = ["['z-positional_value'][0].value", "['z-positional_value'][1].value", "['z-positional_value'][2].value", "['z-positional_value'][3].value", "['z-positional_value'][4].value", "['z-positional_value'][5].value"];
 
     const fetchItems = async() => {
+        console.log("here");
         const data = await fetch('/calculator');
+        console.log(data);
         const oldItems = await data.json();
 
         const items = oldItems.filter(function (a) {
