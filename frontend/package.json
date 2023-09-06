@@ -19,7 +19,7 @@
     "eject": "react-scripts eject"
   },
   
-  "proxy": "https://fbbcalculator.onrender.com/",
+  "proxy": "https://fbbvaluecalculator.onrender.com/",
   "eslintConfig": {
     "extends": [
       "react-app",
