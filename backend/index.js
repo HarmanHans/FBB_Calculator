@@ -1,11 +1,18 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const routesHandler = require('./routes/handler.js');
+const path = require('path');
 const mongoose = require('mongoose');
+const cors = require('cors');
+const corsOptions = require('./config/corsOptions');
 require('dotenv/config')
 
 const app = express();
-app.use(bodyParser.urlencoded({extended:false}))
+
+app.use(cors(corsOptions));
+
+app.use(express.json());
+app.use(bodyParser.urlencoded({extended:false}));
 app.use(bodyParser.json());
 app.use('/', routesHandler);
 
@@ -50,6 +57,11 @@ MongoClient.connect(process.env.MONGODB_URI, function(err, db) {
     });
 }); 
 */
+
+// 18 min
+app.use('/', express.static(path.join(__dirname, '/frontend/src')));
+
+app.use('/', require('./routes/handler.js'));
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}.`);

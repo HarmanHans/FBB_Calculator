@@ -8,7 +8,6 @@ import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 
 function App() {
   return (
-    <Router>
       <div>
         <Nav />
         <Routes>
@@ -16,7 +15,6 @@ function App() {
           <Route path ="/analysis" element= {<Analysis />}/>
         </Routes>
       </div>
-    </Router>
   );
 }
 

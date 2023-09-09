@@ -16,10 +16,13 @@ function Calculator() {
     const selectLocations = ["['z-value'][0].value", "['z-value'][1].value", "['z-value'][2].value", "['z-value'][3].value", "['z-value'][4].value", "['z-value'][5].value", "['z-value'][6].value"];
     const selectPosLocations = ["['z-positional_value'][0].value", "['z-positional_value'][1].value", "['z-positional_value'][2].value", "['z-positional_value'][3].value", "['z-positional_value'][4].value", "['z-positional_value'][5].value"];
 
+    fetch('https://www.fbbvaluecalculator.onrender.com/calculator')
+        .then(res => res.json())
+        .then(data => console.log(data))
+
+
     const fetchItems = async() => {
-        console.log("here");
         const data = await fetch('/calculator');
-        console.log(data);
         const oldItems = await data.json();
 
         const items = oldItems.filter(function (a) {

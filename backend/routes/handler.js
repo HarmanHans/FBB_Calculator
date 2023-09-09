@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const path = require('path');
 const mongoose = require('mongoose');
 const MongoClient = require('mongodb').MongoClient;
 const Schemas = require('../models/Schemas.js');
@@ -7,6 +8,9 @@ const Schemas = require('../models/Schemas.js');
 // Model
 const playerModel = mongoose.model('stats', Schemas);
 
+router.get('^/$|/index(.html)?', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', '..', 'frontend', 'build', 'index.html'));
+})
 
 router.get('/calculator', async (req, res) => {
     let data
