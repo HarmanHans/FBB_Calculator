@@ -2,6 +2,8 @@ import React, {useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
 // import {useTable} from 'react-table';
 import '../Table.css';
+// temporary until backend is fully setup
+import jsonData from '../placeholder.json';
 const BASE_URL = process.env.BASE_URL ;
 
 function Calculator() {
@@ -18,8 +20,8 @@ function Calculator() {
 
     const fetchItems = async() => {
         // const data = await fetch('/calculator');
-        const data = await fetch('../placeholder.json');
-        const oldItems = await data.json();
+        const oldItems = jsonData;
+        // const oldItems = await data.json();
 
         const items = oldItems.filter(function (a) {
             return a['season_averages']['games'] > 0;
