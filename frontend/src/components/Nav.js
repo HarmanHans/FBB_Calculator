@@ -12,13 +12,13 @@ class Nav extends Component {
     render() {
         return (
             <nav className = "Navbar">
-                <h1 className='navbar-logo'>Website Name</h1>
+                <h1 className='navbar-logo'>Fantasy Value Calculator</h1>
                 <div className='menu-icon' onClick={this.handleClick}>
                     <i className={this.state.clicked ? 'fa-solid fa-x' : 'fa-solid fa-bars'}></i>
                 </div>
-                <div>
+                <div className='links'>
                     <ul className={this.state.clicked ? 'nav-menu active' : 'nav-menu'}>
-                        <li><Link to='/Calculator' className= { 'nav-link' }>Value Calculator</Link></li>
+                        <li><Link to='/' className= { 'nav-link' }>Value Calculator</Link></li>
                         <li><Link to='/Analysis' className= { 'nav-link' }>Analysis</Link></li>
                     </ul>
                 </div>

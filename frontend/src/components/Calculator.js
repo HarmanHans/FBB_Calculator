@@ -197,18 +197,18 @@ function Calculator() {
                     <th class='header basic' onClick={() => handleHeaderClick("['name']")}>Name</th>
                     <th class='header basic'>Pos</th>
                     <th class='header basic' onClick={() => handleHeaderClick("['season_averages']['games']")}>Games</th>
-                    {status===1 && <th id='ave' class='header season_average' onClick={() => handleHeaderClick("['season_averages']['minutes']")}>MPG</th>}
-                    {status===1 && <th id='ave' class='header season_average' onClick={() => handleHeaderClick("['season_averages']['pts']")}>PPG</th>}
-                    {status===1 && <th id='ave' class='header season_average' onClick={() => handleHeaderClick("['season_averages']['fg3']")}>3PG</th>}
-                    {status===1 && <th id='ave' class='header season_average' onClick={() => handleHeaderClick("['season_averages']['ast']")}>APG</th>}
-                    {status===1 && <th id='ave' class='header season_average' onClick={() => handleHeaderClick("['season_averages']['reb']")}>RPG</th>}
-                    {status===1 && <th id='ave' class='header season_average' onClick={() => handleHeaderClick("['season_averages']['stl']")}>SPG</th>}
-                    {status===1 && <th id='ave' class='header season_average' onClick={() => handleHeaderClick("['season_averages']['blk']")}>BPG</th>}
-                    {status===1 && <th id='ave' class='header season_average' onClick={() => handleHeaderClick("['season_averages']['fg_pct']")}>FG%</th>}
-                    {status===1 && <th id='ave' class='header season_average' onClick={() => handleHeaderClick("['season_averages']['attempts']")}>Att</th>}
-                    {status===1 && <th id='ave' class='header season_average' onClick={() => handleHeaderClick("['season_averages']['ft_pct']")}>FT%</th>}
-                    {status===1 && <th id='ave' class='header season_average' onClick={() => handleHeaderClick("['season_averages']['ft']")}>FT</th>}
-                    {status===1 && <th id='ave' class='header season_average' onClick={() => handleHeaderClick("['season_averages']['turnovers']")}>TO</th>}
+                    {status===1 && <th id='ave' class='header sortable season_average' onClick={() => handleHeaderClick("['season_averages']['minutes']")}>MPG</th>}
+                    {status===1 && <th id='ave' class='header sortable season_average' onClick={() => handleHeaderClick("['season_averages']['pts']")}>PPG</th>}
+                    {status===1 && <th id='ave' class='header sortable season_average' onClick={() => handleHeaderClick("['season_averages']['fg3']")}>3PG</th>}
+                    {status===1 && <th id='ave' class='header sortable season_average' onClick={() => handleHeaderClick("['season_averages']['ast']")}>APG</th>}
+                    {status===1 && <th id='ave' class='header sortable season_average' onClick={() => handleHeaderClick("['season_averages']['reb']")}>RPG</th>}
+                    {status===1 && <th id='ave' class='header sortable season_average' onClick={() => handleHeaderClick("['season_averages']['stl']")}>SPG</th>}
+                    {status===1 && <th id='ave' class='header sortable season_average' onClick={() => handleHeaderClick("['season_averages']['blk']")}>BPG</th>}
+                    {status===1 && <th id='ave' class='header sortable season_average' onClick={() => handleHeaderClick("['season_averages']['fg_pct']")}>FG%</th>}
+                    {status===1 && <th id='ave' class='header sortable season_average' onClick={() => handleHeaderClick("['season_averages']['attempts']")}>Att</th>}
+                    {status===1 && <th id='ave' class='header sortable season_average' onClick={() => handleHeaderClick("['season_averages']['ft_pct']")}>FT%</th>}
+                    {status===1 && <th id='ave' class='header sortable season_average' onClick={() => handleHeaderClick("['season_averages']['ft']")}>FT</th>}
+                    {status===1 && <th id='ave' class='header sortable season_average' onClick={() => handleHeaderClick("['season_averages']['turnovers']")}>TO</th>}
                     {status===1 && posStatus===1 && visible===1 && <th class='header top_fifty' onClick={() => handleHeaderClick("['z-value']['0']['pts']")}>PV</th>}
                     {status===1 && posStatus===1 && visible===1 && <th class='header top_fifty' onClick={() => handleHeaderClick("['z-value']['0']['fg3']")}>3V</th>}
                     {status===1 && posStatus===1 && visible===1 && <th class='header top_fifty' onClick={() => handleHeaderClick("['z-value']['0']['ast']")}>AV</th>}

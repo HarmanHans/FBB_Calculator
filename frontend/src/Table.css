@@ -94,6 +94,10 @@ fieldset {
   cursor: pointer;
 }
 
+.sortable:hover {
+  text-decoration: underline;
+}
+
 .green {
   background: rgb(155, 216, 173);
 }
